@@ -45,16 +45,20 @@ C:\Users\%USERNAME%\Desktop\vcpkg\vcpkg.exe install --triplet x64-windows
 
 ## Automatyczna instalcja bibliotek
 W projekcie powinny być włączone opcje:
+
+```text
 Use Vcpkg: Yes
 Use Vcpkg Manifest: Yes
 Install Vcpkg Dependencies: Yes
 Use AutoLink: Yes
 App-locally deploy DLLs: Yes
-
+```
+```text
 Można je sprawdzić w:
 Project Properties
 → Configuration Properties
 → vcpkg
+```
 
 ---
 
@@ -76,6 +80,7 @@ Debug | x64
 
 ## Struktura projektu
 
+```text
 Computer-Graphic-Project/
 │
 ├── Computer-Graphic-Project.sln
@@ -141,8 +146,13 @@ Computer-Graphic-Project/
         |
         └──texture/
             └── fish1.png     
+```
+
+ ---
 
 ## Opis modułów
+
+```text
 main.cpp
 Punkt startowy programu; tworzy obiekt Application, uruchamia inicjalizację, główną pętlę aplikacji i sprzątanie zasobów.
 
@@ -187,10 +197,13 @@ Zawiera programy GLSL używane przez OpenGL do renderowania modeli.
 
 assets
 Zawiera pliki zasobów projektu, takie jak modele 3D i tekstury.
+```
 
+ ---
+ 
+## Flow działania projektu
 
-## Flow dziłania projektu
-
+```text
 Application::run()
     ↓
 Time::update()
@@ -220,3 +233,4 @@ ImGui render
 Window::swapBuffers()
     ↓
 gotowa klatka na ekranie
+```
