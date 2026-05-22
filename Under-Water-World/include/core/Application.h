@@ -3,7 +3,7 @@
 #include "core/Window.h" 
 #include "core/Time.h"
 #include "core/Input.h"
-#include "scene/Fish.h"
+#include "scene/entity/Fish1.h"
 #include "scene/Scene.h"
 #include "graphics/Renderer.h"
 

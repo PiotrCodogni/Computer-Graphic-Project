@@ -2,7 +2,7 @@
 
 #include "core/Input.h"
 #include "core/Camera.h"
-#include "scene/Fish.h"
+#include "scene/entity/Fish1.h"
 
 class Scene
 {

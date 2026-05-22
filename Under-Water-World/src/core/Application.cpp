@@ -128,7 +128,8 @@ void Application::renderUi()
         fishPosition.z
     );
 
-    ImGui::Text("WASD - move fish");
+    ImGui::Text("W-A-S-D - move");
+    ImGui::Text("Space-Left_Shift move");
     ImGui::Text("ESC - close app");
 
 

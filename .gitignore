@@ -10,6 +10,7 @@ Release/
 */x64/
 */Debug/
 */Release/
+vcpkg_installed/
 
 # ImGui local settings
 imgui.ini

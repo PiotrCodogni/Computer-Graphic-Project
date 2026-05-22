@@ -15,8 +15,7 @@ bool Renderer::init()
 
 void Renderer::beginFrame()
 {
-    glDisable(GL_SCISSOR_TEST);
-
+   
     glClearColor(0.0f, 0.25f, 0.45f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

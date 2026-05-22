@@ -1,8 +1,9 @@
 #pragma once
 
 #include "core/Input.h"
-#include "graphics/Render_Utils.h"
 #include "graphics/Shader.h"
+#include "graphics/Model.h"
+#include "graphics/Texture.h"
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -31,16 +32,16 @@ public:
     glm::vec3 getPosition() const;
 
 private:
-    bool loadTexture(const char* texturePath);
-
-private:
     glm::vec3 position;
+
     float speed;
     float scale;
+    float animationTime;
 
     GLuint shaderProgram;
-    GLuint textureId;
 
     Core::Shader_Loader shaderLoader;
-    Core::RenderContext renderContext;
+
+    Model model;
+    Texture texture;
 };

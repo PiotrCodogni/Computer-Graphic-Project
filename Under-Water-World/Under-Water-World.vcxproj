@@ -22,10 +22,12 @@
     <ClInclude Include="include\core\Application.h" />
     <ClInclude Include="include\core\Camera.h" />
     <ClInclude Include="include\core\Time.h" />
+    <ClInclude Include="include\graphics\Model.h" />
     <ClInclude Include="include\graphics\Renderer.h" />
     <ClInclude Include="include\graphics\Shader.h" />
     <ClInclude Include="include\graphics\Render_Utils.h" />
-    <ClInclude Include="include\scene\Fish.h" />
+    <ClInclude Include="include\graphics\Texture.h" />
+    <ClInclude Include="include\scene\entity\Fish1.h" />
     <ClInclude Include="include\scene\Scene.h" />
   </ItemGroup>
   <ItemGroup>
@@ -36,20 +38,25 @@
     <ClCompile Include="src\core\Input.cpp" />
     <ClCompile Include="src\core\Time.cpp" />
     <ClCompile Include="src\core\Window.cpp" />
+    <ClCompile Include="src\graphics\Model.cpp" />
     <ClCompile Include="src\graphics\Renderer.cpp" />
     <ClCompile Include="src\graphics\Render_Utils.cpp" />
     <ClCompile Include="src\graphics\Shader.cpp" />
+    <ClCompile Include="src\graphics\Texture.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\scene\Fish.cpp" />
+    <ClCompile Include="src\scene\entity\Fish1.cpp" />
     <ClCompile Include="src\scene\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\models\fish\fish.glb" />
+    <None Include="assets\models\fish1.glb" />
     <None Include="imgui.ini" />
     <None Include="shaders\basic.frag" />
     <None Include="shaders\basic.vert" />
     <None Include="shaders\fish.frag" />
     <None Include="shaders\fish.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\texture\fish1.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
@@ -103,6 +110,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>

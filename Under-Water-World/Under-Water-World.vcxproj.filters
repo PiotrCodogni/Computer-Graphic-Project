@@ -16,11 +16,21 @@
     <ClInclude Include="include\core\Time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\scene\Fish.h">
+    <ClInclude Include="include\scene\entity\Fish1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\graphics\Renderer.h" />
-    <ClInclude Include="include\scene\Scene.h" />
+    <ClInclude Include="include\graphics\Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scene\Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -53,11 +63,21 @@
     <ClCompile Include="include\core\Input.h">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\Fish.cpp">
+    <ClCompile Include="src\scene\entity\Fish1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\Renderer.cpp" />
-    <ClCompile Include="src\scene\Scene.cpp" />
+    <ClCompile Include="src\graphics\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />
@@ -73,7 +93,7 @@
     <None Include="shaders\fish.vert">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="assets\models\fish\fish.glb">
+    <None Include="assets\models\fish1.glb">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -90,5 +110,10 @@
     <Filter Include="Shader Files">
       <UniqueIdentifier>{55540434-e2ac-4f29-b09b-35859de0d48e}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\texture\fish1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

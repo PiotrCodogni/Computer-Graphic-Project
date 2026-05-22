@@ -7,8 +7,8 @@ Scene::Scene()
 bool Scene::init()
 {
     if (!fish.init(
-        "assets/models/fish/fish.glb",
-        "assets/models/fish/Material_baseColor.png",
+        "assets/models/fish1.glb",
+        "assets/texture/fish1.png",
         "shaders/Fish.vert",
         "shaders/Fish.frag"
     ))

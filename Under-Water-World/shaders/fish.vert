@@ -9,11 +9,21 @@ layout(location = 4) in vec3 vertexBitangent;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform float time;
 
 out vec2 texCoord;
 
 void main()
 {
+    vec3 pos = vertexPosition;
+
+    float tailMask = smoothstep(0.0, 0.02, -pos.x);
+
+    float wave = sin(time * 8.0 + pos.x * 120.0);
+
+    pos.y += wave * 0.004 * tailMask;
+
     texCoord = vertexTexCoord;
-    gl_Position = projection * view * model * vec4(vertexPosition, 1.0);
+
+    gl_Position = projection * view * model * vec4(pos, 1.0);
 }
