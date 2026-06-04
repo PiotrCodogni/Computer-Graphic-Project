@@ -4,6 +4,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <vector>
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
@@ -19,6 +20,12 @@ namespace Core
         
 
 		void initFromAssimpMesh(aiMesh* mesh);
+		void initFromVectors(
+			const std::vector<glm::vec3>& positions,
+			const std::vector<glm::vec3>& normals,
+			const std::vector<glm::vec2>& texCoords,
+			const std::vector<unsigned int>& indices
+		);
 	};
 
 	// vertexArray - jednowymiarowa tablica zawierajaca wartosci opisujace pozycje kolejnych wierzcholkow w jednym ciagu (x1, y1, z1, w1, x2, y2, z2, w2, ...)

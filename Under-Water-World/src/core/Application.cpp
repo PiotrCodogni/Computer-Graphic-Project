@@ -128,9 +128,11 @@ void Application::renderUi()
         fishPosition.z
     );
 
-    ImGui::Text("W-A-S-D - move");
-    ImGui::Text("Space-Left_Shift move");
-    ImGui::Text("ESC - close app");
+    ImGui::Text("W-A-S-D - ruch");
+    ImGui::Text("Space / Left Shift - gora / dol");
+    ImGui::Text("R / E - obrot kamery w lewo / prawo");
+    ImGui::Text("Q - widok do przodu (reset kamery)");
+    ImGui::Text("ESC - zamknij");
 
 
     ImGui::End();

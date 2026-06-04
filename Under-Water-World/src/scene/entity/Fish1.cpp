@@ -135,6 +135,13 @@ void Fish::render(
         glm::value_ptr(projection)
     );
 
+    glm::vec3 cameraPos = glm::vec3(glm::inverse(view)[3]);
+    glUniform3fv(
+        glGetUniformLocation(shaderProgram, "cameraPos"),
+        1,
+        glm::value_ptr(cameraPos)
+    );
+
     texture.bind(0);
 
     glUniform1i(

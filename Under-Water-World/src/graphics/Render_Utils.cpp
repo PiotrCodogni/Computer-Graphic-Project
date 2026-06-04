@@ -126,3 +126,56 @@ void Core::DrawContext(Core::RenderContext& context)
 	);
 	glBindVertexArray(0);
 }
+
+void Core::RenderContext::initFromVectors(
+	const std::vector<glm::vec3>& positions,
+	const std::vector<glm::vec3>& normals,
+	const std::vector<glm::vec2>& texCoords,
+	const std::vector<unsigned int>& indices
+) {
+	vertexArray = 0;
+	vertexBuffer = 0;
+	vertexIndexBuffer = 0;
+	size = indices.size();
+
+	std::vector<glm::vec3> tangents(positions.size(), glm::vec3(1.0f, 0.0f, 0.0f));
+	std::vector<glm::vec3> bitangents(positions.size(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	unsigned int vertexDataBufferSize = sizeof(glm::vec3) * positions.size();
+	unsigned int vertexNormalBufferSize = sizeof(glm::vec3) * normals.size();
+	unsigned int vertexTexBufferSize = sizeof(glm::vec2) * texCoords.size();
+	unsigned int vertexTangentBufferSize = sizeof(glm::vec3) * tangents.size();
+	unsigned int vertexBiTangentBufferSize = sizeof(glm::vec3) * bitangents.size();
+
+	unsigned int vertexElementBufferSize = sizeof(unsigned int) * indices.size();
+
+	glGenVertexArrays(1, &vertexArray);
+	glBindVertexArray(vertexArray);
+
+	glGenBuffers(1, &vertexIndexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertexElementBufferSize, &indices[0], GL_STATIC_DRAW);
+
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
+
+	glBufferData(GL_ARRAY_BUFFER, vertexDataBufferSize + vertexNormalBufferSize + vertexTexBufferSize + vertexTangentBufferSize + vertexBiTangentBufferSize, NULL, GL_STATIC_DRAW);
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, vertexDataBufferSize, &positions[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, vertexDataBufferSize, vertexNormalBufferSize, &normals[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, vertexDataBufferSize + vertexNormalBufferSize, vertexTexBufferSize, &texCoords[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, vertexDataBufferSize + vertexNormalBufferSize + vertexTexBufferSize, vertexTangentBufferSize, &tangents[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, vertexDataBufferSize + vertexNormalBufferSize + vertexTexBufferSize + vertexTangentBufferSize, vertexBiTangentBufferSize, &bitangents[0]);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)(0));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)(vertexDataBufferSize));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)(vertexNormalBufferSize + vertexDataBufferSize));
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void*)(vertexDataBufferSize + vertexNormalBufferSize + vertexTexBufferSize));
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void*)(vertexDataBufferSize + vertexNormalBufferSize + vertexTexBufferSize + vertexTangentBufferSize));
+}

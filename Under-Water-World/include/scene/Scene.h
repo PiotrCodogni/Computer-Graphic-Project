@@ -3,6 +3,24 @@
 #include "core/Input.h"
 #include "core/Camera.h"
 #include "scene/entity/Fish1.h"
+#include "graphics/Render_Utils.h"
+#include "graphics/Texture.h"
+#include "graphics/Shader.h"
+#include <vector>
+#include <glm/glm.hpp>
+
+struct RockInstance
+{
+    glm::vec3 position;
+    glm::vec3 scale;
+    float rotationY;
+};
+
+struct AlgaeInstance
+{
+    glm::vec3 position;
+    float scale;
+};
 
 class Scene
 {
@@ -16,7 +34,39 @@ public:
     Fish& getFish();
     Camera& getCamera();
 
+    const Core::RenderContext& getSeabedContext() const { return seabedContext; }
+    const Core::RenderContext& getRockContext() const { return rockContext; }
+    const Core::RenderContext& getAlgaeContext() const { return algaeContext; }
+
+    GLuint getSeabedShader() const { return seabedShader; }
+    GLuint getAlgaeShader() const { return algaeShader; }
+
+    const Texture& getSeabedTexture() const { return seabedTexture; }
+    const Texture& getAlgaeTexture() const { return algaeTexture; }
+
+    const std::vector<RockInstance>& getRocks() const { return rocks; }
+    const std::vector<AlgaeInstance>& getAlgaeList() const { return algaeList; }
+
+    float getSceneTime() const { return sceneTime; }
+
 private:
     Fish fish;
     Camera camera;
+
+    Core::RenderContext seabedContext;
+    Core::RenderContext rockContext;
+    Core::RenderContext algaeContext;
+
+    GLuint seabedShader;
+    GLuint algaeShader;
+
+    Texture seabedTexture;
+    Texture algaeTexture;
+
+    Core::Shader_Loader shaderLoader;
+
+    std::vector<RockInstance> rocks;
+    std::vector<AlgaeInstance> algaeList;
+
+    float sceneTime;
 };
