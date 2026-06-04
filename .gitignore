@@ -1,0 +1,16 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build folders
+x64/
+Debug/
+Release/
+*/x64/
+*/Debug/
+*/Release/
+vcpkg_installed/
+
+# ImGui local settings
+imgui.ini
