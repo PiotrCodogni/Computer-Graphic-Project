@@ -1,7 +1,8 @@
 #version 330 core
 
-in vec2 texCoord;
+in vec3 fragNormal;
 in vec3 fragPos;
+in vec2 texCoord;
 
 out vec4 FragColor;
 
@@ -10,7 +11,15 @@ uniform vec3 cameraPos;
 
 void main()
 {
-    vec3 resultColor = texture(colorTexture, texCoord).rgb;
+    vec4 texColor = texture(colorTexture, texCoord);
+    
+    // Discard transparent pixels using alpha channel from PNG
+    if (texColor.a < 0.15)
+    {
+        discard;
+    }
+    
+    vec3 resultColor = texColor.rgb;
     
     // Underwater Fog
     float distance = length(cameraPos - fragPos);
@@ -20,5 +29,6 @@ void main()
     fogFactor = clamp(fogFactor, 0.0, 1.0);
     
     vec3 finalColor = mix(fogColor, resultColor, fogFactor);
+    
     FragColor = vec4(finalColor, 1.0);
 }
