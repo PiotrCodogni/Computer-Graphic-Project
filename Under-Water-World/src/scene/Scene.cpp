@@ -241,6 +241,7 @@ void Scene::update(float deltaTime, const Input& input)
 {
     sceneTime += deltaTime;
     fish.update(deltaTime, input);
+    camera.update(deltaTime, input);
     camera.followTarget(fish.getPosition());
 }
 
