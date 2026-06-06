@@ -6,9 +6,10 @@
 
 Scene::Scene()
 {
-    sceneTime = 0.0f;
+    sceneTime    = 0.0f;
     seabedShader = 0;
-    algaeShader = 0;
+    algaeShader  = 0;
+    godRaysShader = 0;
 }
 
 float getSeabedHeight(float x, float z)
@@ -40,6 +41,13 @@ bool Scene::init()
     if (algaeShader == 0)
     {
         std::cout << "Failed to load algae shader" << std::endl;
+        return false;
+    }
+
+    godRaysShader = shaderLoader.CreateProgram("shaders/godrays.vert", "shaders/godrays.frag");
+    if (godRaysShader == 0)
+    {
+        std::cout << "Nie udalo sie zaladowac shadera promieni slonecznych" << std::endl;
         return false;
     }
 
@@ -195,7 +203,26 @@ bool Scene::init()
 
     algaeContext.initFromVectors(algaePos, algaeNorm, algaeUV, algaeInd);
 
-    // 4. Generate Random Rock Instances
+    // 4. Prostokat na caly ekran do rysowania promieni slonecznych
+    //    Wierzcholki w przestrzeni ekranu (-1..1)
+    std::vector<glm::vec3> quadPos = {
+        glm::vec3(-1.0f, -1.0f, 0.0f),
+        glm::vec3( 1.0f, -1.0f, 0.0f),
+        glm::vec3( 1.0f,  1.0f, 0.0f),
+        glm::vec3(-1.0f,  1.0f, 0.0f)
+    };
+    std::vector<glm::vec3> quadNorm = {
+        glm::vec3(0,0,1), glm::vec3(0,0,1),
+        glm::vec3(0,0,1), glm::vec3(0,0,1)
+    };
+    std::vector<glm::vec2> quadUV = {
+        glm::vec2(0,0), glm::vec2(1,0),
+        glm::vec2(1,1), glm::vec2(0,1)
+    };
+    std::vector<unsigned int> quadInd = { 0, 1, 2,  0, 2, 3 };
+    godRaysQuad.initFromVectors(quadPos, quadNorm, quadUV, quadInd);
+
+    // 5. Generate Random Rock Instances
     std::srand(12345);
     for (int i = 0; i < 35; ++i)
     {
@@ -260,6 +287,11 @@ void Scene::shutdown()
     {
         shaderLoader.DeleteProgram(algaeShader);
         algaeShader = 0;
+    }
+    if (godRaysShader != 0)
+    {
+        shaderLoader.DeleteProgram(godRaysShader);
+        godRaysShader = 0;
     }
 }
 

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="include\core\Application.h">
@@ -91,6 +91,24 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shaders\fish.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\godrays.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\godrays.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\seabed.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\seabed.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\algae.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\algae.frag">
       <Filter>Shader Files</Filter>
     </None>
     <None Include="assets\models\fish1.glb">
