@@ -38,8 +38,11 @@ public:
     const Core::RenderContext& getRockContext() const { return rockContext; }
     const Core::RenderContext& getAlgaeContext() const { return algaeContext; }
 
-    GLuint getSeabedShader() const { return seabedShader; }
-    GLuint getAlgaeShader() const { return algaeShader; }
+    GLuint getSeabedShader()   const { return seabedShader;   }
+    GLuint getAlgaeShader()    const { return algaeShader;    }
+    GLuint getGodRaysShader()  const { return godRaysShader;  }
+
+    const Core::RenderContext& getGodRaysQuad() const { return godRaysQuad; }
 
     const Texture& getSeabedTexture() const { return seabedTexture; }
     const Texture& getAlgaeTexture() const { return algaeTexture; }
@@ -56,9 +59,11 @@ private:
     Core::RenderContext seabedContext;
     Core::RenderContext rockContext;
     Core::RenderContext algaeContext;
+    Core::RenderContext godRaysQuad;
 
     GLuint seabedShader;
     GLuint algaeShader;
+    GLuint godRaysShader;
 
     Texture seabedTexture;
     Texture algaeTexture;

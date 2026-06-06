@@ -1,6 +1,7 @@
 #include "graphics/Renderer.h"
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 Renderer::Renderer()
@@ -15,7 +16,7 @@ bool Renderer::init()
 
 void Renderer::beginFrame()
 {
-    glClearColor(0.0f, 0.25f, 0.45f, 1.0f);
+    glClearColor(0.05f, 0.35f, 0.55f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -23,19 +24,26 @@ void Renderer::render(Scene& scene)
 {
     float aspectRatio = 1.0f;
 
-    glm::mat4 view = scene.getCamera().getViewMatrix();
+    glm::mat4 view       = scene.getCamera().getViewMatrix();
     glm::mat4 projection = scene.getCamera().getProjectionMatrix(aspectRatio);
-    glm::vec3 cameraPos = scene.getCamera().getPosition();
-    glm::vec3 lightPos = glm::vec3(0.0f, 20.0f, 0.0f);
+    glm::vec3 cameraPos  = scene.getCamera().getPosition();
 
-    // --- 1. RENDER SEABED ---
+    // Slonce nad powierzchnia wody
+    glm::vec3 lightPos = glm::vec3(0.0f, 25.0f, 0.0f);
+
+    float sceneTime = scene.getSceneTime();
+
+    // ------------------------------------------------------------------
+    // 1. RYSOWANIE DNA MORSKIEGO (z odblaskami)
+    // ------------------------------------------------------------------
     GLuint seabedShader = scene.getSeabedShader();
     glUseProgram(seabedShader);
 
-    glUniformMatrix4fv(glGetUniformLocation(seabedShader, "view"), 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(seabedShader, "view"),       1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(seabedShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniform3fv(glGetUniformLocation(seabedShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
-    glUniform3fv(glGetUniformLocation(seabedShader, "lightPos"), 1, glm::value_ptr(lightPos));
+    glUniform3fv(glGetUniformLocation(seabedShader, "lightPos"),  1, glm::value_ptr(lightPos));
+    glUniform1f (glGetUniformLocation(seabedShader, "time"),      sceneTime);   // czas do animacji odblaskow
 
     glm::mat4 identityModel = glm::mat4(1.0f);
     glUniformMatrix4fv(glGetUniformLocation(seabedShader, "model"), 1, GL_FALSE, glm::value_ptr(identityModel));
@@ -45,7 +53,9 @@ void Renderer::render(Scene& scene)
 
     Core::DrawContext(const_cast<Core::RenderContext&>(scene.getSeabedContext()));
 
-    // --- 2. RENDER ROCKS ---
+    // ------------------------------------------------------------------
+    // 2. RYSOWANIE KAMIENI
+    // ------------------------------------------------------------------
     for (const auto& rock : scene.getRocks())
     {
         glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -54,18 +64,20 @@ void Renderer::render(Scene& scene)
         modelMatrix = glm::scale(modelMatrix, rock.scale);
 
         glUniformMatrix4fv(glGetUniformLocation(seabedShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-        
+
         Core::DrawContext(const_cast<Core::RenderContext&>(scene.getRockContext()));
     }
 
-    // --- 3. RENDER ALGAE (waving seaweed) ---
+    // ------------------------------------------------------------------
+    // 3. RYSOWANIE WODOROSTOW
+    // ------------------------------------------------------------------
     GLuint algaeShader = scene.getAlgaeShader();
     glUseProgram(algaeShader);
 
-    glUniformMatrix4fv(glGetUniformLocation(algaeShader, "view"), 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(algaeShader, "view"),       1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(algaeShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniform3fv(glGetUniformLocation(algaeShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
-    glUniform1f(glGetUniformLocation(algaeShader, "time"), scene.getSceneTime());
+    glUniform1f (glGetUniformLocation(algaeShader, "time"),      sceneTime);
 
     scene.getAlgaeTexture().bind(0);
     glUniform1i(glGetUniformLocation(algaeShader, "colorTexture"), 0);
@@ -86,8 +98,42 @@ void Renderer::render(Scene& scene)
 
     if (isCullingEnabled) glEnable(GL_CULL_FACE);
 
-    // --- 4. RENDER PLAYER FISH ---
+    // ------------------------------------------------------------------
+    // 4. RYSOWANIE RYBKI GRACZA
+    // ------------------------------------------------------------------
     scene.getFish().render(view, projection);
+
+    // ------------------------------------------------------------------
+    // 5. RYSOWANIE PROMIENI SLONECZNYCH (addytywne mieszanie)
+    //    Rysujemy na koniec zeby promienie nakladaly sie na cala scene.
+    // ------------------------------------------------------------------
+    GLuint godRaysShader = scene.getGodRaysShader();
+    glUseProgram(godRaysShader);
+
+    // Macierze do shadera - viewProj rzutuje slonce na ekran, invViewProj odtwarza kierunek
+    glm::mat4 viewProj    = projection * view;
+    glm::mat4 invViewProj = glm::inverse(viewProj);
+
+    glUniformMatrix4fv(glGetUniformLocation(godRaysShader, "viewProj"),    1, GL_FALSE, glm::value_ptr(viewProj));
+    glUniformMatrix4fv(glGetUniformLocation(godRaysShader, "invViewProj"), 1, GL_FALSE, glm::value_ptr(invViewProj));
+    glUniform3fv(glGetUniformLocation(godRaysShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
+    glUniform3fv(glGetUniformLocation(godRaysShader, "lightPos"),  1, glm::value_ptr(lightPos));
+    glUniform1f (glGetUniformLocation(godRaysShader, "time"),      sceneTime);
+
+    // Mieszanie addytywne - promienie rozjasniaja to co jest za nimi
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // Nie zapisujemy do bufora glebokosci - promienie nie sa solidna geometria
+    glDepthMask(GL_FALSE);
+    glDisable(GL_DEPTH_TEST);
+
+    Core::DrawContext(const_cast<Core::RenderContext&>(scene.getGodRaysQuad()));
+
+    // Przywracamy normalne ustawienia renderowania
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
 }
 
 void Renderer::endFrame()

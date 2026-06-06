@@ -23,7 +23,7 @@ void main()
     
     // Underwater Fog
     float distance = length(cameraPos - fragPos);
-    vec3 fogColor = vec3(0.0, 0.25, 0.45);
+    vec3 fogColor = vec3(0.05, 0.35, 0.55);
     float fogDensity = 0.025;
     float fogFactor = exp(-distance * fogDensity);
     fogFactor = clamp(fogFactor, 0.0, 1.0);

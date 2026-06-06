@@ -11,7 +11,7 @@ Camera::Camera()
     target   = glm::vec3(0.0f);
     up       = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    yaw           = glm::pi<float>();
+    yaw           = 0.0f;
     orbitDistance = 4.0f;
     orbitHeight   = 2.0f;
     rotateSpeed   = 2.0f;
@@ -25,13 +25,25 @@ Camera::Camera()
 
 void Camera::update(float deltaTime, const Input& input)
 {
-    // R - obrot kamery w lewo
-    if (input.isKeyPressed(GLFW_KEY_R))
+    // Strzalka w lewo - obrot kamery w prawo
+    if (input.isKeyPressed(GLFW_KEY_LEFT))
+        yaw += rotateSpeed * deltaTime;
+
+    // Strzalka w prawo - obrot kamery w lewo
+    if (input.isKeyPressed(GLFW_KEY_RIGHT))
         yaw -= rotateSpeed * deltaTime;
 
-    // E - obrot kamery w prawo
-    if (input.isKeyPressed(GLFW_KEY_E))
-        yaw += rotateSpeed * deltaTime;
+    // Strzalka w dol - kamera do gory
+    if (input.isKeyPressed(GLFW_KEY_DOWN))
+        orbitHeight += 3.0f * deltaTime;
+
+    // Strzalka w gore - kamera w dol
+    if (input.isKeyPressed(GLFW_KEY_UP))
+        orbitHeight -= 3.0f * deltaTime;
+
+    // Zabezpieczenie przed zbytnim oddaleniem kamery
+    if (orbitHeight < -10.0f) orbitHeight = -10.0f;
+    if (orbitHeight > 15.0f) orbitHeight = 15.0f;
 
     // Q - widok za siebie (reset do pozycji startowej za graczem)
     if (input.isKeyPressed(GLFW_KEY_Q))
@@ -47,6 +59,11 @@ void Camera::followTarget(const glm::vec3& targetPosition)
     float camZ = orbitDistance * std::cos(yaw);
 
     position = target + glm::vec3(camX, orbitHeight, camZ);
+
+    // Zabezpieczenie absolutnej pozycji Y, zeby nie wchodzic pod seabed
+    if (position.y < -5.0f) {
+        position.y = -5.0f;
+    }
 }
 
 glm::mat4 Camera::getViewMatrix() const
