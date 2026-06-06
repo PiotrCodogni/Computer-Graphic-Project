@@ -16,7 +16,7 @@ bool Renderer::init()
 
 void Renderer::beginFrame()
 {
-    glClearColor(0.0f, 0.25f, 0.45f, 1.0f);
+    glClearColor(0.05f, 0.35f, 0.55f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -110,10 +110,11 @@ void Renderer::render(Scene& scene)
     GLuint godRaysShader = scene.getGodRaysShader();
     glUseProgram(godRaysShader);
 
-    // Odwrocona macierz pozwala shaderowi obliczyc kierunek patrzenia
+    // Macierze do shadera - viewProj rzutuje slonce na ekran, invViewProj odtwarza kierunek
     glm::mat4 viewProj    = projection * view;
     glm::mat4 invViewProj = glm::inverse(viewProj);
 
+    glUniformMatrix4fv(glGetUniformLocation(godRaysShader, "viewProj"),    1, GL_FALSE, glm::value_ptr(viewProj));
     glUniformMatrix4fv(glGetUniformLocation(godRaysShader, "invViewProj"), 1, GL_FALSE, glm::value_ptr(invViewProj));
     glUniform3fv(glGetUniformLocation(godRaysShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
     glUniform3fv(glGetUniformLocation(godRaysShader, "lightPos"),  1, glm::value_ptr(lightPos));

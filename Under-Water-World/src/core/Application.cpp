@@ -130,8 +130,8 @@ void Application::renderUi()
 
     ImGui::Text("W-A-S-D - ruch");
     ImGui::Text("Space / Left Shift - gora / dol");
-    ImGui::Text("R / E - obrot kamery w lewo / prawo");
-    ImGui::Text("T / G - kamera gora / dol");
+    ImGui::Text("Strzalki lewo/prawo - obrot kamery");
+    ImGui::Text("Strzalki gora/dol - kamera gora/dol");
     ImGui::Text("Q - widok do przodu (reset kamery)");
     ImGui::Text("ESC - zamknij");
 
