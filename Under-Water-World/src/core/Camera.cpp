@@ -33,6 +33,14 @@ void Camera::update(float deltaTime, const Input& input)
     if (input.isKeyPressed(GLFW_KEY_E))
         yaw += rotateSpeed * deltaTime;
 
+    // T - kamera do gory
+    if (input.isKeyPressed(GLFW_KEY_T))
+        orbitHeight += 3.0f * deltaTime;
+
+    // G - kamera w dol
+    if (input.isKeyPressed(GLFW_KEY_G))
+        orbitHeight -= 3.0f * deltaTime;
+
     // Q - widok za siebie (reset do pozycji startowej za graczem)
     if (input.isKeyPressed(GLFW_KEY_Q))
         yaw = 0.0f;
