@@ -54,10 +54,18 @@
   <ItemGroup>
     <None Include="assets\models\fish1.glb" />
     <None Include="imgui.ini" />
+    <None Include="shaders\algae.frag" />
+    <None Include="shaders\algae.vert" />
     <None Include="shaders\basic.frag" />
     <None Include="shaders\basic.vert" />
     <None Include="shaders\fish.frag" />
     <None Include="shaders\fish.vert" />
+    <None Include="shaders\godrays.frag" />
+    <None Include="shaders\godrays.vert" />
+    <None Include="shaders\seabed.frag" />
+    <None Include="shaders\seabed.vert" />
+    <None Include="shaders\Stonehenge.frag" />
+    <None Include="shaders\Stonehenge.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\texture\fish1.png" />

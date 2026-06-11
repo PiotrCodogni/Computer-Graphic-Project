@@ -29,7 +29,7 @@ void Renderer::render(Scene& scene)
     glm::vec3 cameraPos  = scene.getCamera().getPosition();
 
     // Slonce nad powierzchnia wody
-    glm::vec3 lightPos = glm::vec3(0.0f, 25.0f, 0.0f);
+    glm::vec3 lightPos = glm::vec3(-200.19f, 290.01f, -24.38f);
 
     float sceneTime = scene.getSceneTime();
 
@@ -115,7 +115,7 @@ void Renderer::render(Scene& scene)
     // ------------------------------------------------------------------
     // 4b. RYSOWANIE STONEHENGE
     // ------------------------------------------------------------------
-    scene.getStonehenge().render(view, projection);
+    scene.getStonehenge().render(view, projection, sceneTime, cameraPos, fogColor, fogDensity, lightPos);
 
 
     // ------------------------------------------------------------------

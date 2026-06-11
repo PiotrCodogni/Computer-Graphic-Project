@@ -34,8 +34,8 @@ bool Scene::init()
 
     if (!stonehenge.init(
         "assets/models/scene.gltf",
-        "shaders/Fish.vert",
-        "shaders/Fish.frag"
+        "shaders/Stonehenge.vert",
+        "shaders/Stonehenge.frag"
     ))
 
     {

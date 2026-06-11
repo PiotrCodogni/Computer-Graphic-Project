@@ -21,7 +21,12 @@ public:
 
     void render(
         const glm::mat4& view,
-        const glm::mat4& projection
+        const glm::mat4& projection,
+        float time,
+        glm::vec3 cameraPos,
+        glm::vec3 fogColor,
+        float fogDensity,
+        glm::vec3 lightPos
     );
 
     void shutdown();
