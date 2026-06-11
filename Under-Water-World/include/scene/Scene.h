@@ -3,6 +3,7 @@
 #include "core/Input.h"
 #include "core/Camera.h"
 #include "scene/entity/Fish1.h"
+#include "scene/entity/FishSchool.h"
 #include "scene/entity/Stonehenge.h"
 #include "graphics/Render_Utils.h"
 #include "graphics/Texture.h"
@@ -33,6 +34,8 @@ public:
     void shutdown();
 
     Fish& getFish();
+    FishSchool& getFishSchool() { return fishSchool; }
+    std::vector<FishSchool>& getStrayFish() { return strayFish; }
     Camera& getCamera();
     Stonehenge& getStonehenge();
 
@@ -56,6 +59,8 @@ public:
 
 private:
     Fish fish;
+    FishSchool fishSchool;
+    std::vector<FishSchool> strayFish;
     Camera camera;
     Stonehenge stonehenge;
 

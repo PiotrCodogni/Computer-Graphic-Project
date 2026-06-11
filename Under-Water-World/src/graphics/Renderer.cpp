@@ -34,7 +34,7 @@ void Renderer::render(Scene& scene)
     float sceneTime = scene.getSceneTime();
 
     // ------------------------------------------------------------------
-    // 1. RYSOWANIE DNA MORSKIEGO (z odblaskami)
+    // RYSOWANIE DNA MORSKIEGO (z sunlightem)
     // ------------------------------------------------------------------
     GLuint seabedShader = scene.getSeabedShader();
     glUseProgram(seabedShader);
@@ -44,6 +44,11 @@ void Renderer::render(Scene& scene)
     glUniform3fv(glGetUniformLocation(seabedShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
     glUniform3fv(glGetUniformLocation(seabedShader, "lightPos"),  1, glm::value_ptr(lightPos));
     glUniform1f (glGetUniformLocation(seabedShader, "time"),      sceneTime);   // czas do animacji odblaskow
+    
+    glm::vec3 fogColor = glm::vec3(0.05f, 0.35f, 0.55f);
+    float fogDensity = 0.025f;
+    glUniform3fv(glGetUniformLocation(seabedShader, "fogColor"), 1, glm::value_ptr(fogColor));
+    glUniform1f (glGetUniformLocation(seabedShader, "fogDensity"), fogDensity);
 
     glm::mat4 identityModel = glm::mat4(1.0f);
     glUniformMatrix4fv(glGetUniformLocation(seabedShader, "model"), 1, GL_FALSE, glm::value_ptr(identityModel));
@@ -54,7 +59,7 @@ void Renderer::render(Scene& scene)
     Core::DrawContext(const_cast<Core::RenderContext&>(scene.getSeabedContext()));
 
     // ------------------------------------------------------------------
-    // 2. RYSOWANIE KAMIENI
+    //  RYSOWANIE KAMIENI
     // ------------------------------------------------------------------
     for (const auto& rock : scene.getRocks())
     {
@@ -69,7 +74,7 @@ void Renderer::render(Scene& scene)
     }
 
     // ------------------------------------------------------------------
-    // 3. RYSOWANIE WODOROSTOW
+    //  RYSOWANIE WODOROSTOW
     // ------------------------------------------------------------------
     GLuint algaeShader = scene.getAlgaeShader();
     glUseProgram(algaeShader);
@@ -78,6 +83,9 @@ void Renderer::render(Scene& scene)
     glUniformMatrix4fv(glGetUniformLocation(algaeShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniform3fv(glGetUniformLocation(algaeShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
     glUniform1f (glGetUniformLocation(algaeShader, "time"),      sceneTime);
+
+    glUniform3fv(glGetUniformLocation(algaeShader, "fogColor"), 1, glm::value_ptr(glm::vec3(0.05f, 0.35f, 0.55f)));
+    glUniform1f (glGetUniformLocation(algaeShader, "fogDensity"), 0.025f);
 
     scene.getAlgaeTexture().bind(0);
     glUniform1i(glGetUniformLocation(algaeShader, "colorTexture"), 0);
@@ -99,7 +107,7 @@ void Renderer::render(Scene& scene)
     if (isCullingEnabled) glEnable(GL_CULL_FACE);
 
     // ------------------------------------------------------------------
-    // 4. RYSOWANIE RYBKI GRACZA
+    //  RYSOWANIE RYBKI GRACZA
     // ------------------------------------------------------------------
     scene.getFish().render(view, projection);
 
@@ -111,7 +119,18 @@ void Renderer::render(Scene& scene)
 
 
     // ------------------------------------------------------------------
-    // 5. RYSOWANIE PROMIENI SLONECZNYCH (addytywne mieszanie)
+    // RYSOWANIE LAWICY RYB
+    // ------------------------------------------------------------------
+    scene.getFishSchool().render(view, projection, cameraPos, fogColor, fogDensity);
+
+    // ------------------------------------------------------------------
+    // RYSOWANIE POJEDYNCZYCH PLYWAJACYCH GDZIE NIEGDZIE RYBEK
+    // ------------------------------------------------------------------
+    for (auto& stray : scene.getStrayFish())
+        stray.render(view, projection, cameraPos, fogColor, fogDensity);
+
+    // ------------------------------------------------------------------
+    // RYSOWANIE PROMIENI SLONECZNYCH (addytywne mieszanie)
     //    Rysujemy na koniec zeby promienie nakladaly sie na cala scene.
     // ------------------------------------------------------------------
     GLuint godRaysShader = scene.getGodRaysShader();
