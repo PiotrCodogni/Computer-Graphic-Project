@@ -3,6 +3,7 @@
 #include "core/Input.h"
 #include "core/Camera.h"
 #include "scene/entity/Fish1.h"
+#include "scene/entity/FishSchool.h"
 #include "graphics/Render_Utils.h"
 #include "graphics/Texture.h"
 #include "graphics/Shader.h"
@@ -32,6 +33,7 @@ public:
     void shutdown();
 
     Fish& getFish();
+    FishSchool& getFishSchool() { return fishSchool; }
     Camera& getCamera();
 
     const Core::RenderContext& getSeabedContext() const { return seabedContext; }
@@ -54,6 +56,7 @@ public:
 
 private:
     Fish fish;
+    FishSchool fishSchool;
     Camera camera;
 
     Core::RenderContext seabedContext;

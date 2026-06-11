@@ -19,6 +19,9 @@
     <ClInclude Include="include\scene\entity\Fish1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\scene\entity\FishSchool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\graphics\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -64,6 +67,9 @@
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\entity\Fish1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\entity\FishSchool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\Model.cpp">

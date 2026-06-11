@@ -260,6 +260,19 @@ bool Scene::init()
 
         algaeList.push_back(algae);
     }
+    //Inicjalizacja lawicy rybek  (15 ryb w okolicy pozycji 20, -2, 15)
+    if (!fishSchool.init(
+        "assets/models/fish1.glb",
+        "assets/texture/fish1.png",
+        "shaders/Fish.vert",
+        "shaders/Fish.frag",
+        15,
+        glm::vec3(0.0f, -2.0f, -20.0f)
+    ))
+    {
+        std::cout << "Failed to init fish school" << std::endl;
+        return false;
+    }
 
     return true;
 }
@@ -268,6 +281,7 @@ void Scene::update(float deltaTime, const Input& input)
 {
     sceneTime += deltaTime;
     fish.update(deltaTime, input);
+    fishSchool.update(deltaTime);
     camera.update(deltaTime, input);
     camera.followTarget(fish.getPosition());
 }
@@ -275,6 +289,7 @@ void Scene::update(float deltaTime, const Input& input)
 void Scene::shutdown()
 {
     fish.shutdown();
+    fishSchool.shutdown();
     seabedTexture.shutdown();
     algaeTexture.shutdown();
 
