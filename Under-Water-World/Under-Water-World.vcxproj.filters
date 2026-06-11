@@ -31,6 +31,9 @@
     <ClInclude Include="include\graphics\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\scene\entity\Stonehenge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -78,6 +81,9 @@
     <ClCompile Include="src\scene\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene\entity\Stonehenge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />
@@ -91,24 +97,6 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shaders\fish.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="shaders\godrays.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="shaders\godrays.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="shaders\seabed.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="shaders\seabed.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="shaders\algae.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="shaders\algae.frag">
       <Filter>Shader Files</Filter>
     </None>
     <None Include="assets\models\fish1.glb">

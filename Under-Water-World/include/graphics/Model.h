@@ -1,15 +1,20 @@
 #pragma once
-
 #include "graphics/Render_Utils.h"
+#include "graphics/Texture.h"
+#include <vector>
+
+struct MeshData {
+    Core::RenderContext context;
+    Texture texture;
+};
 
 class Model
 {
 public:
     Model();
-
     bool loadFromFile(const char* path);
     void draw();
 
 private:
-    Core::RenderContext renderContext;
+    std::vector<MeshData> meshes;
 };

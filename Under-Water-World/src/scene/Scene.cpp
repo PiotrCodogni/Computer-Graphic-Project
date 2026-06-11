@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <glm/gtc/constants.hpp>
+#include "scene/entity/Stonehenge.h"
 
 Scene::Scene()
 {
@@ -28,6 +29,28 @@ bool Scene::init()
     {
         return false;
     }
+
+
+
+    if (!stonehenge.init(
+        "assets/models/scene.gltf",
+        "shaders/Fish.vert",
+        "shaders/Fish.frag"
+    ))
+
+    {
+        std::cout << "Failed to load Stonehenge" << std::endl;
+        return false;
+    }
+
+    stonehenge.setPosition(glm::vec3(0.0f, -6.5f, -45.0f));
+    stonehenge.setRotation(glm::vec3(-90.0f, 2.5f, 0.0f));
+    stonehenge.setScale(0.1f);
+
+    stonehenge.setPivotOffset(glm::vec3(0.0f, 0.0f, 0.0f));
+
+
+
 
     // Load shaders
     seabedShader = shaderLoader.CreateProgram("shaders/seabed.vert", "shaders/seabed.frag");
@@ -275,6 +298,7 @@ void Scene::update(float deltaTime, const Input& input)
 void Scene::shutdown()
 {
     fish.shutdown();
+    stonehenge.shutdown();
     seabedTexture.shutdown();
     algaeTexture.shutdown();
 
@@ -303,4 +327,9 @@ Fish& Scene::getFish()
 Camera& Scene::getCamera()
 {
     return camera;
+}
+
+Stonehenge& Scene::getStonehenge()
+{
+    return stonehenge;
 }

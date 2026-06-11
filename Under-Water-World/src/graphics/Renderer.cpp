@@ -103,6 +103,13 @@ void Renderer::render(Scene& scene)
     // ------------------------------------------------------------------
     scene.getFish().render(view, projection);
 
+
+    // ------------------------------------------------------------------
+    // 4b. RYSOWANIE STONEHENGE
+    // ------------------------------------------------------------------
+    scene.getStonehenge().render(view, projection);
+
+
     // ------------------------------------------------------------------
     // 5. RYSOWANIE PROMIENI SLONECZNYCH (addytywne mieszanie)
     //    Rysujemy na koniec zeby promienie nakladaly sie na cala scene.

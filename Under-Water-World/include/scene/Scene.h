@@ -3,6 +3,7 @@
 #include "core/Input.h"
 #include "core/Camera.h"
 #include "scene/entity/Fish1.h"
+#include "scene/entity/Stonehenge.h"
 #include "graphics/Render_Utils.h"
 #include "graphics/Texture.h"
 #include "graphics/Shader.h"
@@ -33,6 +34,7 @@ public:
 
     Fish& getFish();
     Camera& getCamera();
+    Stonehenge& getStonehenge();
 
     const Core::RenderContext& getSeabedContext() const { return seabedContext; }
     const Core::RenderContext& getRockContext() const { return rockContext; }
@@ -55,6 +57,7 @@ public:
 private:
     Fish fish;
     Camera camera;
+    Stonehenge stonehenge;
 
     Core::RenderContext seabedContext;
     Core::RenderContext rockContext;

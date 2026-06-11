@@ -110,7 +110,7 @@ void Fish::render(
 
     modelMatrix = glm::rotate(
         modelMatrix,
-        glm::radians(90.0f),
+        glm::radians(-90.0f),
         glm::vec3(1.0f, 0.0f, 0.0f)
     );
 
