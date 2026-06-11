@@ -34,7 +34,7 @@ void Renderer::render(Scene& scene)
     float sceneTime = scene.getSceneTime();
 
     // ------------------------------------------------------------------
-    // 1. RYSOWANIE DNA MORSKIEGO (z odblaskami)
+    // RYSOWANIE DNA MORSKIEGO (z sunlightem)
     // ------------------------------------------------------------------
     GLuint seabedShader = scene.getSeabedShader();
     glUseProgram(seabedShader);
@@ -59,7 +59,7 @@ void Renderer::render(Scene& scene)
     Core::DrawContext(const_cast<Core::RenderContext&>(scene.getSeabedContext()));
 
     // ------------------------------------------------------------------
-    // 2. RYSOWANIE KAMIENI
+    //  RYSOWANIE KAMIENI
     // ------------------------------------------------------------------
     for (const auto& rock : scene.getRocks())
     {
@@ -74,7 +74,7 @@ void Renderer::render(Scene& scene)
     }
 
     // ------------------------------------------------------------------
-    // 3. RYSOWANIE WODOROSTOW
+    //  RYSOWANIE WODOROSTOW
     // ------------------------------------------------------------------
     GLuint algaeShader = scene.getAlgaeShader();
     glUseProgram(algaeShader);
@@ -107,12 +107,23 @@ void Renderer::render(Scene& scene)
     if (isCullingEnabled) glEnable(GL_CULL_FACE);
 
     // ------------------------------------------------------------------
-    // 4. RYSOWANIE RYBKI GRACZA
+    //  RYSOWANIE RYBKI GRACZA
     // ------------------------------------------------------------------
     scene.getFish().render(view, projection);
 
     // ------------------------------------------------------------------
-    // 5. RYSOWANIE PROMIENI SLONECZNYCH (addytywne mieszanie)
+    // RYSOWANIE LAWICY RYB
+    // ------------------------------------------------------------------
+    scene.getFishSchool().render(view, projection, cameraPos, fogColor, fogDensity);
+
+    // ------------------------------------------------------------------
+    // RYSOWANIE POJEDYNCZYCH PLYWAJACYCH GDZIE NIEGDZIE RYBEK
+    // ------------------------------------------------------------------
+    for (auto& stray : scene.getStrayFish())
+        stray.render(view, projection, cameraPos, fogColor, fogDensity);
+
+    // ------------------------------------------------------------------
+    // RYSOWANIE PROMIENI SLONECZNYCH (addytywne mieszanie)
     //    Rysujemy na koniec zeby promienie nakladaly sie na cala scene.
     // ------------------------------------------------------------------
     GLuint godRaysShader = scene.getGodRaysShader();

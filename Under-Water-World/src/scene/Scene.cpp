@@ -260,6 +260,52 @@ bool Scene::init()
 
         algaeList.push_back(algae);
     }
+    //Inicjalizacja lawicy rybek  (15 ryb w okolicy pozycji 20, -2, 15)
+    if (!fishSchool.init(
+        "assets/models/fish1.glb",
+        "assets/texture/fish1.png",
+        "shaders/Fish.vert",
+        "shaders/Fish.frag",
+        15,
+        glm::vec3(0.0f, -2.0f, -20.0f)
+    ))
+    {
+        std::cout << "Failed to init fish school" << std::endl;
+        return false;
+    }
+    // Pojedyncze/parami rybki rozrzucone po scenie
+    struct StraySpawn {
+        int count;
+        glm::vec3 pos;
+    };
+    StraySpawn straySpawns[] = {
+        { 1, glm::vec3(-25.0f, -1.0f, -10.0f) },
+        { 2, glm::vec3( 15.0f,  0.0f, -35.0f) },
+        { 1, glm::vec3(-10.0f, -3.0f,  20.0f) },
+        { 2, glm::vec3( 30.0f, -2.0f,   5.0f) },
+        { 1, glm::vec3(-35.0f,  1.0f, -25.0f) },
+        { 2, glm::vec3(  5.0f, -4.0f,  30.0f) },
+        { 1, glm::vec3( 40.0f,  0.0f, -15.0f) },
+        { 1, glm::vec3(-20.0f, -2.0f, -40.0f) },
+    };
+
+    for (const auto& spawn : straySpawns)
+    {
+        FishSchool stray;
+        if (!stray.init(
+            "assets/models/fish1.glb",
+            "assets/texture/fish1.png",
+            "shaders/Fish.vert",
+            "shaders/Fish.frag",
+            spawn.count,
+            spawn.pos
+        ))
+        {
+            std::cout << "Failed to init stray fish" << std::endl;
+            return false;
+        }
+        strayFish.push_back(std::move(stray));
+    }
 
     return true;
 }
@@ -268,6 +314,9 @@ void Scene::update(float deltaTime, const Input& input)
 {
     sceneTime += deltaTime;
     fish.update(deltaTime, input);
+    fishSchool.update(deltaTime);
+    for (auto& stray : strayFish)
+        stray.update(deltaTime);
     camera.update(deltaTime, input);
     camera.followTarget(fish.getPosition());
 }
@@ -275,6 +324,9 @@ void Scene::update(float deltaTime, const Input& input)
 void Scene::shutdown()
 {
     fish.shutdown();
+    fishSchool.shutdown();
+    for (auto& stray : strayFish)
+        stray.shutdown();
     seabedTexture.shutdown();
     algaeTexture.shutdown();
 
