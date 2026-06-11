@@ -117,6 +117,12 @@ void Renderer::render(Scene& scene)
     scene.getFishSchool().render(view, projection, cameraPos, fogColor, fogDensity);
 
     // ------------------------------------------------------------------
+    // RYSOWANIE POJEDYNCZYCH PLYWAJACYCH GDZIE NIEGDZIE RYBEK
+    // ------------------------------------------------------------------
+    for (auto& stray : scene.getStrayFish())
+        stray.render(view, projection, cameraPos, fogColor, fogDensity);
+
+    // ------------------------------------------------------------------
     // RYSOWANIE PROMIENI SLONECZNYCH (addytywne mieszanie)
     //    Rysujemy na koniec zeby promienie nakladaly sie na cala scene.
     // ------------------------------------------------------------------

@@ -34,6 +34,7 @@ public:
 
     Fish& getFish();
     FishSchool& getFishSchool() { return fishSchool; }
+    std::vector<FishSchool>& getStrayFish() { return strayFish; }
     Camera& getCamera();
 
     const Core::RenderContext& getSeabedContext() const { return seabedContext; }
@@ -57,6 +58,7 @@ public:
 private:
     Fish fish;
     FishSchool fishSchool;
+    std::vector<FishSchool> strayFish;
     Camera camera;
 
     Core::RenderContext seabedContext;
