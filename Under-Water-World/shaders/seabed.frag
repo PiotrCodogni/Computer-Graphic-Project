@@ -10,6 +10,8 @@ uniform sampler2D colorTexture;
 uniform vec3 lightPos;
 uniform vec3 cameraPos;
 uniform float time;   // czas sceny do animacji odblaskow
+uniform vec3 fogColor;
+uniform float fogDensity;
 
 // -------------------------------------------------------
 // Funkcje losowe - zamieniaja pozycje komorki na losowa wartosc
@@ -130,8 +132,6 @@ void main()
 
     // --- Mgla podwodna ---
     float dist       = length(cameraPos - fragPos);
-    vec3  fogColor   = vec3(0.05, 0.35, 0.55);
-    float fogDensity = 0.025;
     float fogFactor  = exp(-dist * fogDensity);
     fogFactor = clamp(fogFactor, 0.0, 1.0);
 

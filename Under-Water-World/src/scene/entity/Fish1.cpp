@@ -142,6 +142,18 @@ void Fish::render(
         glm::value_ptr(cameraPos)
     );
 
+    glm::vec3 fogColor = glm::vec3(0.05f, 0.35f, 0.55f);
+    float fogDensity = 0.025f;
+    glUniform3fv(
+        glGetUniformLocation(shaderProgram, "fogColor"),
+        1,
+        glm::value_ptr(fogColor)
+    );
+    glUniform1f(
+        glGetUniformLocation(shaderProgram, "fogDensity"),
+        fogDensity
+    );
+
     texture.bind(0);
 
     glUniform1i(
