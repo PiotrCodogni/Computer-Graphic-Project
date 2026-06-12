@@ -13,13 +13,13 @@ Pearl::Pearl()
     position = glm::vec3(2.0f, -2.0f, -4.0f);
     scale = 0.8f;
 
-    baseColor = glm::vec3(1.0f, 0.88f, 0.78f);
+    baseColor = glm::vec3(1.0f, 0.92f, 0.82f);
 
-    fresnelPower = 3.0f;
+    fresnelPower = 2.2f;
     refractionRatio = 0.66f;
-    reflectionStrength = 1.35f;
-    refractionStrength = 0.02f;
-    f0 = 0.35f;
+    reflectionStrength = 0.8f;
+    refractionStrength = 0.0f;
+    f0 = 0.08f;
 
     shaderProgram = 0;
 }

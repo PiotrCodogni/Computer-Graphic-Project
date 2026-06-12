@@ -9,7 +9,7 @@
 
 Fish::Fish()
 {
-    position = glm::vec3(0.0f, 0.0f, 0.0f);
+    position = glm::vec3(-12.0f, 0.0f, -18.0f);
 
     rotation = glm::quat(glm::vec3(0.0f, 0.0f, 0.0f));
     rotationSpeed = 6.0f;

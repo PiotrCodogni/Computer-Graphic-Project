@@ -65,7 +65,7 @@ bool Scene::init()
         return false;
     }
 
-    glm::vec3 pearlGroundPoint = glm::vec3(-29.33f, -5.32f, -41.83f);
+    glm::vec3 pearlGroundPoint = glm::vec3(-29.33f, -7.32f, -41.83f);
     float pearlRadius = 3.0f;
 
     glm::vec3 pearlCenter = pearlGroundPoint + glm::vec3(0.0f, pearlRadius, 0.0f);
