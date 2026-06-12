@@ -7,6 +7,7 @@
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 class Fish
 {
@@ -33,6 +34,9 @@ public:
 
 private:
     glm::vec3 position;
+
+    glm::quat rotation;
+    float rotationSpeed;
 
     float speed;
     float scale;

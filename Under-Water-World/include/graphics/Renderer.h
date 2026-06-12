@@ -7,9 +7,17 @@ class Renderer
 public:
     Renderer();
 
-    bool init();
+    bool init(int width, int height);
+    void shutdown();
+
     void beginFrame();
     void render(Scene& scene);
     void endFrame();
-    void shutdown();
+
+    void setViewportSize(int width, int height);
+
+
+private:
+    int viewportWidth;
+    int viewportHeight;
 };

@@ -48,7 +48,7 @@ bool Application::init()
     ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    if (!renderer.init())
+    if (!renderer.init(window.getWidth(), window.getHeight()))
     {
         return false;
     }
@@ -108,10 +108,17 @@ void Application::update(float deltaTime)
 
 void Application::render()
 {
+    int width;
+    int height;
+
+    glfwGetFramebufferSize(window.getWindow(), &width, &height);
+
+    glViewport(0, 0, width, height);
+
+    renderer.setViewportSize(width, height);
+
     renderer.beginFrame();
-
     renderer.render(scene);
-
     renderer.endFrame();
 }
 

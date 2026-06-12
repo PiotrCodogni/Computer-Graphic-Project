@@ -10,10 +10,13 @@
 Fish::Fish()
 {
     position = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    rotation = glm::quat(glm::vec3(0.0f, 0.0f, 0.0f));
+    rotationSpeed = 6.0f;
+
     speed = 2.0f;
     scale = 40.0f;
     animationTime = 0.0f;
-
     shaderProgram = 0;
 }
 
@@ -49,39 +52,73 @@ bool Fish::init(
 }
 
 void Fish::update(float deltaTime, const Input& input)
-{   
+{
     animationTime += deltaTime;
-    float movement = speed * deltaTime;
-    
+
+	// obliczanie kierunku ruchu na podstawie wciśniętych klawiszy
+    glm::vec3 moveDirection(0.0f);
 
     if (input.isKeyPressed(GLFW_KEY_W))
     {
-        position.z -= movement;
+        moveDirection.z -= 1.0f;
     }
 
     if (input.isKeyPressed(GLFW_KEY_S))
     {
-        position.z += movement;
+        moveDirection.z += 1.0f;
     }
 
     if (input.isKeyPressed(GLFW_KEY_A))
     {
-        position.x -= movement;
+        moveDirection.x -= 1.0f;
     }
 
     if (input.isKeyPressed(GLFW_KEY_D))
     {
-        position.x += movement;
+        moveDirection.x += 1.0f;
     }
 
     if (input.isKeyPressed(GLFW_KEY_SPACE))
     {
-        position.y += movement;
+        moveDirection.y += 1.0f;
     }
 
     if (input.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
     {
-        position.y -= movement;
+        moveDirection.y -= 1.0f;
+    }
+
+	// normalizacja kierunku ruchu i aktualizacja pozycji
+    if (glm::length(moveDirection) > 0.0f)
+    {
+        moveDirection = glm::normalize(moveDirection);
+
+        position += moveDirection * speed * deltaTime;
+
+        glm::vec3 horizontalDirection = glm::vec3(
+            moveDirection.x,
+            0.0f,
+            moveDirection.z
+        );
+
+		// obracanie ryby w kierunku ruchu
+        if (glm::length(horizontalDirection) > 0.0f)
+        {
+            horizontalDirection = glm::normalize(horizontalDirection);
+
+            float targetYaw = atan2(
+                -horizontalDirection.x,
+                -horizontalDirection.z
+            );
+            
+            glm::quat targetRotation = glm::angleAxis(
+                targetYaw,
+                glm::vec3(0.0f, 1.0f, 0.0f)
+            );
+			// interpolacja rotacji ryby w kierunku docelowej rotacji
+            float t = glm::clamp(rotationSpeed * deltaTime, 0.0f, 1.0f);
+            rotation = glm::slerp(rotation, targetRotation, t);
+        }
     }
 }
 
@@ -100,6 +137,7 @@ void Fish::render(
     glm::mat4 modelMatrix = glm::mat4(1.0f);
 
     modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix *= glm::mat4_cast(rotation);
     modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
 
     modelMatrix = glm::rotate(

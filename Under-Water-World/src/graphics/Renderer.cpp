@@ -6,10 +6,15 @@
 
 Renderer::Renderer()
 {
+    viewportWidth = 1000;
+    viewportHeight = 1000;
 }
 
-bool Renderer::init()
+bool Renderer::init(int width, int height)
 {
+    viewportWidth = width;
+    viewportHeight = height;
+
     glEnable(GL_DEPTH_TEST);
     return true;
 }
@@ -23,6 +28,11 @@ void Renderer::beginFrame()
 void Renderer::render(Scene& scene)
 {
     float aspectRatio = 1.0f;
+
+    if (viewportHeight != 0)
+    {
+        aspectRatio = static_cast<float>(viewportWidth) / static_cast<float>(viewportHeight);
+    }
 
     glm::mat4 view       = scene.getCamera().getViewMatrix();
     glm::mat4 projection = scene.getCamera().getProjectionMatrix(aspectRatio);
@@ -160,6 +170,12 @@ void Renderer::render(Scene& scene)
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
+}
+
+void Renderer::setViewportSize(int width, int height)
+{
+    viewportWidth = width;
+    viewportHeight = height;
 }
 
 void Renderer::endFrame()
