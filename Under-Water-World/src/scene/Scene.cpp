@@ -43,6 +43,36 @@ bool Scene::init()
         return false;
     }
 
+    if (!pearlEnvironmentMap.loadFromFiles({
+    "assets/environment/pearl/right.png",
+    "assets/environment/pearl/left.png",
+    "assets/environment/pearl/top.png",
+    "assets/environment/pearl/bottom.png",
+    "assets/environment/pearl/front.png",
+    "assets/environment/pearl/back.png"
+        }))
+    {
+        std::cout << "Failed to load pearl environment cubemap" << std::endl;
+        return false;
+    }
+
+    if (!pearl.init(
+        "shaders/pearl.vert",
+        "shaders/pearl.frag"
+    ))
+    {
+        std::cout << "Failed to init pearl" << std::endl;
+        return false;
+    }
+
+    glm::vec3 pearlGroundPoint = glm::vec3(-29.33f, -5.32f, -41.83f);
+    float pearlRadius = 3.0f;
+
+    glm::vec3 pearlCenter = pearlGroundPoint + glm::vec3(0.0f, pearlRadius, 0.0f);
+
+    pearl.setPosition(pearlCenter);
+    pearl.setScale(pearlRadius);
+
     stonehenge.setPosition(glm::vec3(0.0f, -6.5f, -45.0f));
     stonehenge.setRotation(glm::vec3(-90.0f, 2.5f, 0.0f));
     stonehenge.setScale(0.1f);
@@ -353,6 +383,9 @@ void Scene::shutdown()
 	stonehenge.shutdown();
     seabedTexture.shutdown();
     algaeTexture.shutdown();
+    pearl.shutdown();
+    pearlEnvironmentMap.shutdown();
+    
 
     if (seabedShader != 0)
     {
@@ -384,4 +417,14 @@ Camera& Scene::getCamera()
 Stonehenge& Scene::getStonehenge()
 {
     return stonehenge;
+}
+
+GLuint Scene::getPearlEnvironmentMapId() const
+{
+    return pearlEnvironmentMap.getId();
+}
+
+Pearl& Scene::getPearl()
+{
+    return pearl;
 }
