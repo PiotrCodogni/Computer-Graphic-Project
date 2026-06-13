@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <utility>
 #include <glm/gtc/constants.hpp>
 #include "scene/entity/Stonehenge.h"
 
@@ -23,8 +24,8 @@ bool Scene::init()
     if (!fish.init(
         "assets/models/fish1.glb",
         "assets/texture/fish1.png",
-        "shaders/Fish.vert",
-        "shaders/Fish.frag"
+        "shaders/fish.vert",
+        "shaders/fish.frag"
     ))
     {
         return false;
@@ -287,8 +288,8 @@ bool Scene::init()
     if (!fishSchool.init(
         "assets/models/fish1.glb",
         "assets/texture/fish1.png",
-        "shaders/Fish.vert",
-        "shaders/Fish.frag",
+        "shaders/fish.vert",
+        "shaders/fish.frag",
         15,
         glm::vec3(0.0f, -2.0f, -20.0f)
     ))
@@ -318,8 +319,8 @@ bool Scene::init()
         if (!stray.init(
             "assets/models/fish1.glb",
             "assets/texture/fish1.png",
-            "shaders/Fish.vert",
-            "shaders/Fish.frag",
+            "shaders/fish.vert",
+            "shaders/fish.frag",
             spawn.count,
             spawn.pos
         ))
