@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <cmath>
 #include <iostream>
 
 Fish::Fish()
@@ -106,7 +107,7 @@ void Fish::update(float deltaTime, const Input& input)
         {
             horizontalDirection = glm::normalize(horizontalDirection);
 
-            float targetYaw = atan2(
+            float targetYaw = std::atan2(
                 -horizontalDirection.x,
                 -horizontalDirection.z
             );

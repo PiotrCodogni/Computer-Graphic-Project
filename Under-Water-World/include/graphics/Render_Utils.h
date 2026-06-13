@@ -46,7 +46,7 @@ namespace Core
 
 	struct VertexData
 	{
-		static const int MAX_ATTRIBS = 8;
+		static constexpr int MAX_ATTRIBS = 8;
 		VertexAttribute Attribs[MAX_ATTRIBS];
 		int NumActiveAttribs;
 		int NumVertices;

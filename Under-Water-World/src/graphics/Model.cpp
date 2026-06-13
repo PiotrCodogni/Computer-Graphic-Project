@@ -5,6 +5,7 @@
 #include <assimp/postprocess.h>
 
 #include <iostream>
+#include <string>
 
 Model::Model()
 {
