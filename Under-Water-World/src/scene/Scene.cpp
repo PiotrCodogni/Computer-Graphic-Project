@@ -2,15 +2,111 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <vector>
+#include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include "scene/entity/Stonehenge.h"
 
+// -------------------------------------------------------
+
+// -------------------------------------------------------
+// generateRockNormalMap
+// Tworzy proceduralnie teksture normalnych dla kamienia:
+// losowe nierownomiernosci z warstw sinusoidalnych (FBM).
+// Zwraca id tekstury OpenGL.
+// -------------------------------------------------------
+// Funkcja pomocnicza: prosty szum pseudolosowy dla danej wspolrzednej calkowitoliczbowej
+static float rockHash(int x, int y) {
+    int n = x + y * 57;
+    n = (n << 13) ^ n;
+    return (1.0f - ((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0f);
+}
+
+// Funkcja pomocnicza: interpolowany szum wartosciowy (Value Noise)
+static float rockNoise(float x, float y) {
+    int ix = (int)std::floor(x);
+    int iy = (int)std::floor(y);
+    float fx = x - ix;
+    float fy = y - iy;
+
+    float u = fx * fx * (3.0f - 2.0f * fx);
+    float v = fy * fy * (3.0f - 2.0f * fy);
+
+    float n00 = rockHash(ix, iy);
+    float n10 = rockHash(ix + 1, iy);
+    float n01 = rockHash(ix, iy + 1);
+    float n11 = rockHash(ix + 1, iy + 1);
+
+    return (n00 * (1.0f - u) + n10 * u) * (1.0f - v) + 
+           (n01 * (1.0f - u) + n11 * u) * v;
+}
+
+static GLuint generateRockNormalMap(int w, int h)
+{
+    // Najpierw generujemy heightmape z warstw ostrego szumu
+    std::vector<float> hmap(w * h);
+    for (int y = 0; y < h; y++)
+    {
+        for (int x = 0; x < w; x++)
+        {
+            float fx = (float)x / (float)w * 25.0f;
+            float fy = (float)y / (float)h * 25.0f;
+            
+            float h_val = 0.0f;
+            float amp = 1.0f;
+            // 6 oktaw FBM z uzyciem turbulencji (abs) dla ostrych, spękanych krawędzi
+            for(int i = 0; i < 6; i++) {
+                h_val += amp * std::abs(rockNoise(fx, fy));
+                fx *= 2.1f;
+                fy *= 2.1f;
+                amp *= 0.5f;
+            }
+            hmap[y * w + x] = -h_val; // odwracamy dla efektu wgłębień
+        }
+    }
+
+    // Obliczamy normalne z gradientu heightmapy (metoda central differences)
+    std::vector<unsigned char> px(w * h * 3);
+    for (int y = 0; y < h; y++)
+    {
+        for (int x = 0; x < w; x++)
+        {
+            int xl = (x - 1 + w) % w;
+            int xr = (x + 1) % w;
+            int yd = (y - 1 + h) % h;
+            int yu = (y + 1) % h;
+
+            float dx = (hmap[y * w + xr] - hmap[y * w + xl]);
+            float dz = (hmap[yu * w + x] - hmap[yd * w + x]);
+
+            glm::vec3 n = glm::normalize(glm::vec3(-dx, 1.0f, -dz));
+
+            int idx = (y * w + x) * 3;
+            px[idx+0] = (unsigned char)((n.x * 0.5f + 0.5f) * 255.0f);
+            px[idx+1] = (unsigned char)((n.y * 0.5f + 0.5f) * 255.0f);
+            px[idx+2] = (unsigned char)((n.z * 0.5f + 0.5f) * 255.0f);
+        }
+    }
+
+    GLuint id;
+    glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, px.data());
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    return id;
+}
+
 Scene::Scene()
 {
-    sceneTime    = 0.0f;
-    seabedShader = 0;
-    algaeShader  = 0;
-    godRaysShader = 0;
+    sceneTime      = 0.0f;
+    seabedShader   = 0;
+    algaeShader    = 0;
+    godRaysShader  = 0;
+    rockNormalMapId   = 0;
 }
 
 float getSeabedHeight(float x, float z)
@@ -74,7 +170,7 @@ bool Scene::init()
         return false;
     }
 
-    // Load textures
+    // Wczytanie tekstury dna - zostaje jako kolor bazowy
     if (!seabedTexture.loadFromFile("assets/texture/seabed.png", true))
     {
         std::cout << "Failed to load seabed texture" << std::endl;
@@ -86,6 +182,10 @@ bool Scene::init()
         std::cout << "Failed to load algae texture" << std::endl;
         return false;
     }
+
+    // Generowanie proceduralnych normalmap dla kamienia
+    rockNormalMapId   = generateRockNormalMap(256, 256);
+    std::cout << "Generated procedural normal map for rock" << std::endl;
 
     // 1. Generate Seabed Geometry
     std::vector<glm::vec3> positions;
@@ -369,6 +469,8 @@ void Scene::shutdown()
         shaderLoader.DeleteProgram(godRaysShader);
         godRaysShader = 0;
     }
+    // Usuniecie proceduralnych normalmap
+    if (rockNormalMapId   != 0) { glDeleteTextures(1, &rockNormalMapId);   rockNormalMapId   = 0; }
 }
 
 Fish& Scene::getFish()

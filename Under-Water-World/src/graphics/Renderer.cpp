@@ -66,6 +66,9 @@ void Renderer::render(Scene& scene)
     scene.getSeabedTexture().bind(0);
     glUniform1i(glGetUniformLocation(seabedShader, "colorTexture"), 0);
 
+    // Ustawienie isRock na false dla dna morskiego
+    glUniform1i(glGetUniformLocation(seabedShader, "isRock"), 0);
+
     Core::DrawContext(const_cast<Core::RenderContext&>(scene.getSeabedContext()));
 
     // ------------------------------------------------------------------
@@ -79,6 +82,14 @@ void Renderer::render(Scene& scene)
         modelMatrix = glm::scale(modelMatrix, rock.scale);
 
         glUniformMatrix4fv(glGetUniformLocation(seabedShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+        // Normalmap dla kamienia (slot 1) - inna tekstura normalnych niz dla piasku
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, scene.getRockNormalMapId());
+        glUniform1i(glGetUniformLocation(seabedShader, "normalMap"), 1);
+
+        // Ustawienie isRock na true dla skal
+        glUniform1i(glGetUniformLocation(seabedShader, "isRock"), 1);
 
         Core::DrawContext(const_cast<Core::RenderContext&>(scene.getRockContext()));
     }
