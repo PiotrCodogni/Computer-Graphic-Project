@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <glm/glm.hpp>
+#include <utility>
 #include <glm/gtc/constants.hpp>
 #include "scene/entity/Stonehenge.h"
 
@@ -121,8 +122,8 @@ bool Scene::init()
     if (!fish.init(
         "assets/models/fish1.glb",
         "assets/texture/fish1.png",
-        "shaders/Fish.vert",
-        "shaders/Fish.frag"
+        "shaders/fish.vert",
+        "shaders/fish.frag"
     ))
     {
         return false;
@@ -140,6 +141,36 @@ bool Scene::init()
         std::cout << "Failed to load Stonehenge" << std::endl;
         return false;
     }
+
+    if (!pearlEnvironmentMap.loadFromFiles({
+    "assets/environment/pearl/right.png",
+    "assets/environment/pearl/left.png",
+    "assets/environment/pearl/top.png",
+    "assets/environment/pearl/bottom.png",
+    "assets/environment/pearl/front.png",
+    "assets/environment/pearl/back.png"
+        }))
+    {
+        std::cout << "Failed to load pearl environment cubemap" << std::endl;
+        return false;
+    }
+
+    if (!pearl.init(
+        "shaders/pearl.vert",
+        "shaders/pearl.frag"
+    ))
+    {
+        std::cout << "Failed to init pearl" << std::endl;
+        return false;
+    }
+
+    glm::vec3 pearlGroundPoint = glm::vec3(-29.33f, -7.32f, -41.83f);
+    float pearlRadius = 3.0f;
+
+    glm::vec3 pearlCenter = pearlGroundPoint + glm::vec3(0.0f, pearlRadius, 0.0f);
+
+    pearl.setPosition(pearlCenter);
+    pearl.setScale(pearlRadius);
 
     stonehenge.setPosition(glm::vec3(0.0f, -6.5f, -45.0f));
     stonehenge.setRotation(glm::vec3(-90.0f, 2.5f, 0.0f));
@@ -511,8 +542,8 @@ bool Scene::init()
     if (!fishSchool.init(
         "assets/models/fish1.glb",
         "assets/texture/fish1.png",
-        "shaders/Fish.vert",
-        "shaders/Fish.frag",
+        "shaders/fish.vert",
+        "shaders/fish.frag",
         15,
         glm::vec3(0.0f, -2.0f, -20.0f)
     ))
@@ -542,8 +573,8 @@ bool Scene::init()
         if (!stray.init(
             "assets/models/fish1.glb",
             "assets/texture/fish1.png",
-            "shaders/Fish.vert",
-            "shaders/Fish.frag",
+            "shaders/fish.vert",
+            "shaders/fish.frag",
             spawn.count,
             spawn.pos
         ))
@@ -577,6 +608,9 @@ void Scene::shutdown()
 	stonehenge.shutdown();
     seabedTexture.shutdown();
     algaeTexture.shutdown();
+    pearl.shutdown();
+    pearlEnvironmentMap.shutdown();
+    
 
     if (seabedShader != 0)
     {
@@ -612,4 +646,14 @@ Camera& Scene::getCamera()
 Stonehenge& Scene::getStonehenge()
 {
     return stonehenge;
+}
+
+GLuint Scene::getPearlEnvironmentMapId() const
+{
+    return pearlEnvironmentMap.getId();
+}
+
+Pearl& Scene::getPearl()
+{
+    return pearl;
 }

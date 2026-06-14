@@ -1,5 +1,7 @@
 #pragma once
 
+#include "graphics/Cubemap.h"
+#include "scene/entity/Pearl.h"
 #include "core/Input.h"
 #include "core/Camera.h"
 #include "scene/entity/Fish1.h"
@@ -29,6 +31,7 @@ class Scene
 public:
     Scene();
 
+
     bool init();
     void update(float deltaTime, const Input& input);
     void shutdown();
@@ -38,6 +41,7 @@ public:
     std::vector<FishSchool>& getStrayFish() { return strayFish; }
     Camera& getCamera();
     Stonehenge& getStonehenge();
+    Pearl& getPearl();
 
     const Core::RenderContext& getSeabedContext() const { return seabedContext; }
     const Core::RenderContext& getRockContext() const { return rockContext; }
@@ -46,8 +50,8 @@ public:
     GLuint getSeabedShader()       const { return seabedShader;       }
     GLuint getAlgaeShader()        const { return algaeShader;        }
     GLuint getGodRaysShader()      const { return godRaysShader;      }
-    // Proceduralna normalmapa dla kamieni
     GLuint getRockNormalMapId()    const { return rockNormalMapId;    }
+    GLuint getPearlEnvironmentMapId() const;
 
     const Core::RenderContext& getGodRaysQuad() const { return godRaysQuad; }
     const Core::RenderContext& getWaterSurfaceContext() const { return waterSurfaceContext; }
@@ -63,12 +67,15 @@ public:
 
     float getSceneTime() const { return sceneTime; }
 
+
 private:
     Fish fish;
     FishSchool fishSchool;
     std::vector<FishSchool> strayFish;
     Camera camera;
     Stonehenge stonehenge;
+    Cubemap pearlEnvironmentMap;
+    Pearl pearl;
 
     Core::RenderContext seabedContext;
     Core::RenderContext rockContext;

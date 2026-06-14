@@ -5,11 +5,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <cmath>
 #include <iostream>
 
 Fish::Fish()
 {
-    position = glm::vec3(0.0f, 0.0f, 0.0f);
+    position = glm::vec3(-12.0f, 0.0f, -18.0f);
 
     rotation = glm::quat(glm::vec3(0.0f, 0.0f, 0.0f));
     rotationSpeed = 6.0f;
@@ -106,7 +107,7 @@ void Fish::update(float deltaTime, const Input& input)
         {
             horizontalDirection = glm::normalize(horizontalDirection);
 
-            float targetYaw = atan2(
+            float targetYaw = std::atan2(
                 -horizontalDirection.x,
                 -horizontalDirection.z
             );
