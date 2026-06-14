@@ -34,9 +34,11 @@ void Renderer::render(Scene& scene)
         aspectRatio = static_cast<float>(viewportWidth) / static_cast<float>(viewportHeight);
     }
 
-    glm::mat4 view       = scene.getCamera().getViewMatrix();
+    glm::mat4 view = scene.getCamera().getViewMatrix();
     glm::mat4 projection = scene.getCamera().getProjectionMatrix(aspectRatio);
-    glm::vec3 cameraPos  = scene.getCamera().getPosition();
+    glm::vec3 cameraPos = scene.getCamera().getPosition();
+
+  
 
     // Slonce nad powierzchnia wody
     glm::vec3 lightPos = glm::vec3(-200.19f, 290.01f, -24.38f);
@@ -49,16 +51,16 @@ void Renderer::render(Scene& scene)
     GLuint seabedShader = scene.getSeabedShader();
     glUseProgram(seabedShader);
 
-    glUniformMatrix4fv(glGetUniformLocation(seabedShader, "view"),       1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(seabedShader, "view"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(seabedShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniform3fv(glGetUniformLocation(seabedShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
-    glUniform3fv(glGetUniformLocation(seabedShader, "lightPos"),  1, glm::value_ptr(lightPos));
-    glUniform1f (glGetUniformLocation(seabedShader, "time"),      sceneTime);   // czas do animacji odblaskow
-    
+    glUniform3fv(glGetUniformLocation(seabedShader, "lightPos"), 1, glm::value_ptr(lightPos));
+    glUniform1f(glGetUniformLocation(seabedShader, "time"), sceneTime);   // czas do animacji odblaskow
+
     glm::vec3 fogColor = glm::vec3(0.05f, 0.35f, 0.55f);
     float fogDensity = 0.025f;
     glUniform3fv(glGetUniformLocation(seabedShader, "fogColor"), 1, glm::value_ptr(fogColor));
-    glUniform1f (glGetUniformLocation(seabedShader, "fogDensity"), fogDensity);
+    glUniform1f(glGetUniformLocation(seabedShader, "fogDensity"), fogDensity);
 
     glm::mat4 identityModel = glm::mat4(1.0f);
     glUniformMatrix4fv(glGetUniformLocation(seabedShader, "model"), 1, GL_FALSE, glm::value_ptr(identityModel));
@@ -89,13 +91,13 @@ void Renderer::render(Scene& scene)
     GLuint algaeShader = scene.getAlgaeShader();
     glUseProgram(algaeShader);
 
-    glUniformMatrix4fv(glGetUniformLocation(algaeShader, "view"),       1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(algaeShader, "view"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(algaeShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniform3fv(glGetUniformLocation(algaeShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
-    glUniform1f (glGetUniformLocation(algaeShader, "time"),      sceneTime);
+    glUniform1f(glGetUniformLocation(algaeShader, "time"), sceneTime);
 
     glUniform3fv(glGetUniformLocation(algaeShader, "fogColor"), 1, glm::value_ptr(glm::vec3(0.05f, 0.35f, 0.55f)));
-    glUniform1f (glGetUniformLocation(algaeShader, "fogDensity"), 0.025f);
+    glUniform1f(glGetUniformLocation(algaeShader, "fogDensity"), 0.025f);
 
     scene.getAlgaeTexture().bind(0);
     glUniform1i(glGetUniformLocation(algaeShader, "colorTexture"), 0);
@@ -115,6 +117,16 @@ void Renderer::render(Scene& scene)
     }
 
     if (isCullingEnabled) glEnable(GL_CULL_FACE);
+
+    scene.getPearl().render(
+        view,
+        projection,
+        cameraPos,
+        scene.getPearlEnvironmentMapId(),
+        sceneTime,
+        fogColor,
+        fogDensity
+    );
 
     // ------------------------------------------------------------------
     //  RYSOWANIE RYBKI GRACZA
@@ -147,14 +159,14 @@ void Renderer::render(Scene& scene)
     glUseProgram(godRaysShader);
 
     // Macierze do shadera - viewProj rzutuje slonce na ekran, invViewProj odtwarza kierunek
-    glm::mat4 viewProj    = projection * view;
+    glm::mat4 viewProj = projection * view;
     glm::mat4 invViewProj = glm::inverse(viewProj);
 
-    glUniformMatrix4fv(glGetUniformLocation(godRaysShader, "viewProj"),    1, GL_FALSE, glm::value_ptr(viewProj));
+    glUniformMatrix4fv(glGetUniformLocation(godRaysShader, "viewProj"), 1, GL_FALSE, glm::value_ptr(viewProj));
     glUniformMatrix4fv(glGetUniformLocation(godRaysShader, "invViewProj"), 1, GL_FALSE, glm::value_ptr(invViewProj));
     glUniform3fv(glGetUniformLocation(godRaysShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
-    glUniform3fv(glGetUniformLocation(godRaysShader, "lightPos"),  1, glm::value_ptr(lightPos));
-    glUniform1f (glGetUniformLocation(godRaysShader, "time"),      sceneTime);
+    glUniform3fv(glGetUniformLocation(godRaysShader, "lightPos"), 1, glm::value_ptr(lightPos));
+    glUniform1f(glGetUniformLocation(godRaysShader, "time"), sceneTime);
 
     // Mieszanie addytywne - promienie rozjasniaja to co jest za nimi
     glEnable(GL_BLEND);
@@ -185,3 +197,4 @@ void Renderer::endFrame()
 void Renderer::shutdown()
 {
 }
+
