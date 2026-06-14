@@ -4,6 +4,10 @@
 *.suo
 
 # Build folders
+build/
+build*/
+build-*/
+cmake-build-*/
 x64/
 Debug/
 Release/
@@ -11,6 +15,36 @@ Release/
 */Debug/
 */Release/
 vcpkg_installed/
+vcpkg_installed_linux/
+compile_commands.json
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+
+# Compiler/linker outputs
+*.o
+*.lo
+*.la
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.elf
+*.pdb
+*.ilk
+*.idb
+*.ipdb
+*.iobj
+
+# Windows metadata copied into WSL
+*:Zone.Identifier
 
 # ImGui local settings
 imgui.ini

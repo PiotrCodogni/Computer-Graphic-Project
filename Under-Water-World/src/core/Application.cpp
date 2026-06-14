@@ -15,7 +15,7 @@ Application::Application()
 
 bool Application::init()
 {
-    if (!window.init(1000, 1000, "Under Water World"))
+    if (!window.init(1024, 1024, "Under Water World"))
     {
         return false;
     }
@@ -83,7 +83,7 @@ void Application::run()
 
         renderUi();
 
-        // render ImGui
+        //render ImGui
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
