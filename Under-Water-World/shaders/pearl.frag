@@ -28,8 +28,7 @@ void main()
     // Kierunek od fragmentu do kamery.
     vec3 viewDir = normalize(cameraPos - fragPos);
 
-    // Kierunek promienia "od kamery do powierzchni".
-    // Tego używamy do reflect/refract.
+    // Kierunek promienia "od kamery do powierzchni" (reflect/retract).
     vec3 incident = normalize(fragPos - cameraPos);
 
     vec3 reflectedDir = reflect(incident, normal);
@@ -43,21 +42,22 @@ void main()
     float fresnel = f0 + (1.0 - f0) * pow(1.0 - cosTheta, fresnelPower);
     fresnel = clamp(fresnel, 0.0, 1.0);
 
-    // perłowy połysk
-    float pearlWave = dot(normal, viewDir) * 8.0 + time * 0.35;
-    vec3 pearlShift = 0.5 + 0.5 * sin(vec3(0.0, 2.1, 4.2) + pearlWave);
+    //Lolor zmienia sie pod katem patrzenia.
+    float viewAngle = 1.0 - cosTheta;
+    float pearlWave = dot(normal, viewDir) * 8.0 + viewAngle * 10.0 + time * 0.25;
 
-    vec3 pearlBase = baseColor * mix(vec3(0.90), pearlShift, 0.18);
+    vec3 pearlShift = 0.5 + 0.5 * cos(vec3(0.0, 2.0, 4.0) + pearlWave);
+    vec3 pearlBase = baseColor * mix(vec3(0.92), pearlShift, 0.25 + fresnel * 0.35);
 
-   vec3 environmentColor =
-   reflectedColor * reflectionStrength +
-   refractedColor * refractionStrength * 0.12 * (1.0 - fresnel);
+    vec3 environmentColor =
+        reflectedColor * reflectionStrength * (0.35 + fresnel) +
+        refractedColor * refractionStrength * (1.0 - fresnel);
 
-    // Im większy Fresnel, tym mocniej widać odbicie.
+    // Im wiekszy Fresnel, tym mocniej widac odbicie na krawedziach.
     vec3 finalColor = mix(
         pearlBase,
         environmentColor,
-        0.35 + fresnel * 0.45
+        0.25 + fresnel * 0.55
     );
 
     // Lekka mgła

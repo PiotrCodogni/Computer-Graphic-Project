@@ -15,11 +15,11 @@ Pearl::Pearl()
 
     baseColor = glm::vec3(1.0f, 0.92f, 0.82f);
 
-    fresnelPower = 2.2f;
+    fresnelPower = 5.0f;
     refractionRatio = 0.66f;
-    reflectionStrength = 0.8f;
-    refractionStrength = 0.0f;
-    f0 = 0.08f;
+    reflectionStrength = 0.9f;
+    refractionStrength = 0.18f;
+    f0 = 0.07f;
 
     shaderProgram = 0;
 }
