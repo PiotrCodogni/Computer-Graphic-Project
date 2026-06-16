@@ -68,6 +68,9 @@ void Renderer::render(Scene& scene)
     scene.getSeabedTexture().bind(0);
     glUniform1i(glGetUniformLocation(seabedShader, "colorTexture"), 0);
 
+    // Ustawienie isRock na false dla dna morskiego
+    glUniform1i(glGetUniformLocation(seabedShader, "isRock"), 0);
+
     Core::DrawContext(const_cast<Core::RenderContext&>(scene.getSeabedContext()));
 
     // ------------------------------------------------------------------
@@ -81,6 +84,14 @@ void Renderer::render(Scene& scene)
         modelMatrix = glm::scale(modelMatrix, rock.scale);
 
         glUniformMatrix4fv(glGetUniformLocation(seabedShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+        // Normalmap dla kamienia (slot 1) - inna tekstura normalnych niz dla piasku
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, scene.getRockNormalMapId());
+        glUniform1i(glGetUniformLocation(seabedShader, "normalMap"), 1);
+
+        // Ustawienie isRock na true dla skal
+        glUniform1i(glGetUniformLocation(seabedShader, "isRock"), 1);
 
         Core::DrawContext(const_cast<Core::RenderContext&>(scene.getRockContext()));
     }
@@ -151,9 +162,40 @@ void Renderer::render(Scene& scene)
     for (auto& stray : scene.getStrayFish())
         stray.render(view, projection, cameraPos, fogColor, fogDensity);
 
+    
+    // RYSOWANIE POWIERZCHNI WODY (od spodu, z normal mappingiem)
+    // Addytywne blending - woda rozjasnia scene zamiast ja zaslaniac
+    
+    GLuint waterSurfaceShader = scene.getWaterSurfaceShader();
+    glUseProgram(waterSurfaceShader);
+
+    glUniformMatrix4fv(glGetUniformLocation(waterSurfaceShader, "view"),       1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(waterSurfaceShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glm::mat4 waterModel = glm::mat4(1.0f);
+    waterModel = glm::translate(waterModel, glm::vec3(cameraPos.x, 0.0f, cameraPos.z));
+    glUniformMatrix4fv(glGetUniformLocation(waterSurfaceShader, "model"),      1, GL_FALSE, glm::value_ptr(waterModel));
+    glUniform3fv(glGetUniformLocation(waterSurfaceShader, "cameraPos"),  1, glm::value_ptr(cameraPos));
+    glUniform3fv(glGetUniformLocation(waterSurfaceShader, "lightPos"),   1, glm::value_ptr(lightPos));
+    glUniform1f (glGetUniformLocation(waterSurfaceShader, "time"),       sceneTime);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, scene.getWaterNormalMapId());
+    glUniform1i(glGetUniformLocation(waterSurfaceShader, "normalMap"), 0);
+
+    // Addytywne blending: woda ROZJASNIA to co za nia - nie blokuje slonca
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    // Woda nie blokuje (zapis) głębokości dla promieni godrays
+    glDepthMask(GL_FALSE);
+    
+    Core::DrawContext(const_cast<Core::RenderContext&>(scene.getWaterSurfaceContext()));
+
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+
     // ------------------------------------------------------------------
     // RYSOWANIE PROMIENI SLONECZNYCH (addytywne mieszanie)
-    //    Rysujemy na koniec zeby promienie nakladaly sie na cala scene.
+    //    Rysujemy na koncu zeby promienie nakladaly sie na cala scene.
     // ------------------------------------------------------------------
     GLuint godRaysShader = scene.getGodRaysShader();
     glUseProgram(godRaysShader);

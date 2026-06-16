@@ -18,7 +18,7 @@ Camera::Camera()
 
     fov   = 60.0f;
     zNear = 0.1f;
-    zFar  = 500.0f;
+    zFar  = 5000.0f;
 
     position = target + glm::vec3(0.0f, orbitHeight, orbitDistance);
 }

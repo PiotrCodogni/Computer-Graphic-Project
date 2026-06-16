@@ -47,12 +47,17 @@ public:
     const Core::RenderContext& getRockContext() const { return rockContext; }
     const Core::RenderContext& getAlgaeContext() const { return algaeContext; }
 
-    GLuint getSeabedShader()   const { return seabedShader;   }
-    GLuint getAlgaeShader()    const { return algaeShader;    }
-    GLuint getGodRaysShader()  const { return godRaysShader;  }
+    GLuint getSeabedShader()       const { return seabedShader;       }
+    GLuint getAlgaeShader()        const { return algaeShader;        }
+    GLuint getGodRaysShader()      const { return godRaysShader;      }
+    GLuint getRockNormalMapId()    const { return rockNormalMapId;    }
     GLuint getPearlEnvironmentMapId() const;
 
     const Core::RenderContext& getGodRaysQuad() const { return godRaysQuad; }
+    const Core::RenderContext& getWaterSurfaceContext() const { return waterSurfaceContext; }
+
+    GLuint getWaterSurfaceShader()  const { return waterSurfaceShader;  }
+    GLuint getWaterNormalMapId()    const { return waterNormalMapId;    }
 
     const Texture& getSeabedTexture() const { return seabedTexture; }
     const Texture& getAlgaeTexture() const { return algaeTexture; }
@@ -76,10 +81,15 @@ private:
     Core::RenderContext rockContext;
     Core::RenderContext algaeContext;
     Core::RenderContext godRaysQuad;
+    Core::RenderContext waterSurfaceContext;
 
     GLuint seabedShader;
     GLuint algaeShader;
     GLuint godRaysShader;
+    GLuint waterSurfaceShader;
+    // Proceduralna normalmapa dla kamienia generowana w Scene::init()
+    GLuint rockNormalMapId;
+    GLuint waterNormalMapId;
 
     Texture seabedTexture;
     Texture algaeTexture;

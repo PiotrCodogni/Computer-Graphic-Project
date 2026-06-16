@@ -2,16 +2,114 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <vector>
+#include <glm/glm.hpp>
 #include <utility>
 #include <glm/gtc/constants.hpp>
 #include "scene/entity/Stonehenge.h"
 
+// -------------------------------------------------------
+
+// -------------------------------------------------------
+// generateRockNormalMap
+// Tworzy proceduralnie teksture normalnych dla kamienia:
+// losowe nierownomiernosci z warstw sinusoidalnych (FBM).
+// Zwraca id tekstury OpenGL.
+// -------------------------------------------------------
+// Funkcja pomocnicza: prosty szum pseudolosowy dla danej wspolrzednej calkowitoliczbowej
+static float rockHash(int x, int y) {
+    int n = x + y * 57;
+    n = (n << 13) ^ n;
+    return (1.0f - ((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0f);
+}
+
+// Funkcja pomocnicza: interpolowany szum wartosciowy (Value Noise)
+static float rockNoise(float x, float y) {
+    int ix = (int)std::floor(x);
+    int iy = (int)std::floor(y);
+    float fx = x - ix;
+    float fy = y - iy;
+
+    float u = fx * fx * (3.0f - 2.0f * fx);
+    float v = fy * fy * (3.0f - 2.0f * fy);
+
+    float n00 = rockHash(ix, iy);
+    float n10 = rockHash(ix + 1, iy);
+    float n01 = rockHash(ix, iy + 1);
+    float n11 = rockHash(ix + 1, iy + 1);
+
+    return (n00 * (1.0f - u) + n10 * u) * (1.0f - v) + 
+           (n01 * (1.0f - u) + n11 * u) * v;
+}
+
+static GLuint generateRockNormalMap(int w, int h)
+{
+    // Najpierw generujemy heightmape z warstw ostrego szumu
+    std::vector<float> hmap(w * h);
+    for (int y = 0; y < h; y++)
+    {
+        for (int x = 0; x < w; x++)
+        {
+            float fx = (float)x / (float)w * 25.0f;
+            float fy = (float)y / (float)h * 25.0f;
+            
+            float h_val = 0.0f;
+            float amp = 1.0f;
+            // 6 oktaw FBM z uzyciem turbulencji (abs) dla ostrych, spękanych krawędzi
+            for(int i = 0; i < 6; i++) {
+                h_val += amp * std::abs(rockNoise(fx, fy));
+                fx *= 2.1f;
+                fy *= 2.1f;
+                amp *= 0.5f;
+            }
+            hmap[y * w + x] = -h_val; // odwracamy dla efektu wgłębień
+        }
+    }
+
+    // Obliczamy normalne z gradientu heightmapy (metoda central differences)
+    std::vector<unsigned char> px(w * h * 3);
+    for (int y = 0; y < h; y++)
+    {
+        for (int x = 0; x < w; x++)
+        {
+            int xl = (x - 1 + w) % w;
+            int xr = (x + 1) % w;
+            int yd = (y - 1 + h) % h;
+            int yu = (y + 1) % h;
+
+            float dx = (hmap[y * w + xr] - hmap[y * w + xl]);
+            float dz = (hmap[yu * w + x] - hmap[yd * w + x]);
+
+            glm::vec3 n = glm::normalize(glm::vec3(-dx, 1.0f, -dz));
+
+            int idx = (y * w + x) * 3;
+            px[idx+0] = (unsigned char)((n.x * 0.5f + 0.5f) * 255.0f);
+            px[idx+1] = (unsigned char)((n.y * 0.5f + 0.5f) * 255.0f);
+            px[idx+2] = (unsigned char)((n.z * 0.5f + 0.5f) * 255.0f);
+        }
+    }
+
+    GLuint id;
+    glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, px.data());
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    return id;
+}
+
 Scene::Scene()
 {
-    sceneTime    = 0.0f;
-    seabedShader = 0;
-    algaeShader  = 0;
-    godRaysShader = 0;
+    sceneTime         = 0.0f;
+    seabedShader      = 0;
+    algaeShader       = 0;
+    godRaysShader     = 0;
+    waterSurfaceShader= 0;
+    rockNormalMapId   = 0;
+    waterNormalMapId  = 0;
 }
 
 float getSeabedHeight(float x, float z)
@@ -105,7 +203,7 @@ bool Scene::init()
         return false;
     }
 
-    // Load textures
+    // Wczytanie tekstury dna - zostaje jako kolor bazowy
     if (!seabedTexture.loadFromFile("assets/texture/seabed.png", true))
     {
         std::cout << "Failed to load seabed texture" << std::endl;
@@ -116,6 +214,132 @@ bool Scene::init()
     {
         std::cout << "Failed to load algae texture" << std::endl;
         return false;
+    }
+
+    // Generowanie proceduralnych normalmap dla kamienia
+    rockNormalMapId   = generateRockNormalMap(256, 256);
+    std::cout << "Generated procedural normal map for rock" << std::endl;
+
+    //normalmapa dla powierchni wody (animowane fale)
+     {
+        const int W = 512, H = 512;
+        std::vector<unsigned char> px(W * H * 3);
+        for (int y = 0; y < H; y++)
+        {
+            for (int x = 0; x < W; x++)
+            {
+                // Szum wielowarstwowy: plynne, szerokie fale wodne
+                float fx = (float)x / (float)W * glm::two_pi<float>() * 6.0f;
+                float fy = (float)y / (float)H * glm::two_pi<float>() * 6.0f;
+
+                // Aby tekstura wody byla seamless na calej powierzchni
+                float bx = std::sin(fx * 1.0f + fy * 1.0f) * 0.55f
+                         + std::sin(fx * 2.0f - fy * 2.0f) * 0.30f
+                         + std::sin(fx * 1.0f + fy * 3.0f) * 0.15f;
+                float bz = std::cos(fx * 1.0f + fy * 1.0f) * 0.55f
+                         + std::cos(fx * 2.0f - fy * 2.0f) * 0.30f
+                         + std::cos(fx * 3.0f + fy * 1.0f) * 0.15f;
+
+                
+                glm::vec3 n = glm::normalize(glm::vec3(-bx, 1.5f, -bz));
+
+                int idx = (y * W + x) * 3;
+                px[idx+0] = (unsigned char)((n.x * 0.5f + 0.5f) * 255.0f);
+                px[idx+1] = (unsigned char)((n.y * 0.5f + 0.5f) * 255.0f);
+                px[idx+2] = (unsigned char)((n.z * 0.5f + 0.5f) * 255.0f);
+            }
+        }
+        glGenTextures(1, &waterNormalMapId);
+        glBindTexture(GL_TEXTURE_2D, waterNormalMapId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, W, H, 0, GL_RGB, GL_UNSIGNED_BYTE, px.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        std::cout << "procedural water surface normal map" << std::endl;
+    }
+
+    // Shader powierzchni wody
+    waterSurfaceShader = shaderLoader.CreateProgram("shaders/water_surface.vert", "shaders/water_surface.frag");
+    if (waterSurfaceShader == 0)
+    {
+        std::cout << "Failed to load water surface shader" << std::endl;
+        return false;
+    }
+
+     {
+        const float WSZ = 6000.0f; 
+        const float H   = 450.0f; 
+        const int   SEG = 30;
+        float step = WSZ / SEG;
+        float half = WSZ / 2.0f;
+
+        std::vector<glm::vec3> wpos, wnorm, wtan, wbitan;
+        std::vector<glm::vec2> wuv;
+        std::vector<unsigned int> wind;
+
+        for (int i = 0; i <= SEG; i++)
+        {
+            for (int j = 0; j <= SEG; j++)
+            {
+                float x = -half + i * step;
+                float z = -half + j * step;
+                wpos.push_back(glm::vec3(x, H, z));
+                wnorm.push_back(glm::vec3(0.0f, -1.0f, 0.0f)); 
+                wtan.push_back(glm::vec3(1.0f, 0.0f, 0.0f));  
+                wbitan.push_back(glm::vec3(0.0f, 0.0f, 1.0f)); 
+                
+                wuv.push_back(glm::vec2(x / WSZ * 1.0f, z / WSZ * 1.0f));
+            }
+        }
+
+        for (int i = 0; i < SEG; i++)
+        {
+            for (int j = 0; j < SEG; j++)
+            {
+                int r1 = i * (SEG + 1);
+                int r2 = (i + 1) * (SEG + 1);
+                // Odwrocona kolejnosc wierzcchołkow: widzimy od spodu
+                wind.push_back(r1 + j);
+                wind.push_back(r1 + j + 1);
+                wind.push_back(r2 + j);
+
+                wind.push_back(r1 + j + 1);
+                wind.push_back(r2 + j + 1);
+                wind.push_back(r2 + j);
+            }
+        }
+
+        GLuint vao, vboPos, vboNorm, vboUV, vboTan, vboBitan, ebo;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+
+        auto upload = [&](GLuint& vbo, int loc, const void* data, size_t bytes, int comp) {
+            glGenBuffers(1, &vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, bytes, data, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(loc);
+            glVertexAttribPointer(loc, comp, GL_FLOAT, GL_FALSE, 0, nullptr);
+        };
+
+        upload(vboPos,   0, wpos.data(),   wpos.size()   * sizeof(glm::vec3), 3);
+        upload(vboNorm,  1, wnorm.data(),  wnorm.size()  * sizeof(glm::vec3), 3);
+        upload(vboUV,    2, wuv.data(),    wuv.size()    * sizeof(glm::vec2), 2);
+        upload(vboTan,   3, wtan.data(),   wtan.size()   * sizeof(glm::vec3), 3);
+        upload(vboBitan, 4, wbitan.data(), wbitan.size() * sizeof(glm::vec3), 3);
+
+        glGenBuffers(1, &ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, wind.size() * sizeof(unsigned int), wind.data(), GL_STATIC_DRAW);
+
+        waterSurfaceContext.vertexArray       = vao;
+        waterSurfaceContext.vertexBuffer      = vboPos;
+        waterSurfaceContext.vertexIndexBuffer = ebo;
+        waterSurfaceContext.size              = (int)wind.size();
+
+        glBindVertexArray(0);
+        
     }
 
     // 1. Generate Seabed Geometry
@@ -403,6 +627,10 @@ void Scene::shutdown()
         shaderLoader.DeleteProgram(godRaysShader);
         godRaysShader = 0;
     }
+    // Usuniecie proceduralnych normalmap
+    if (rockNormalMapId  != 0) { glDeleteTextures(1, &rockNormalMapId);  rockNormalMapId  = 0; }
+    if (waterNormalMapId != 0) { glDeleteTextures(1, &waterNormalMapId); waterNormalMapId = 0; }
+    if (waterSurfaceShader != 0) { shaderLoader.DeleteProgram(waterSurfaceShader); waterSurfaceShader = 0; }
 }
 
 Fish& Scene::getFish()
