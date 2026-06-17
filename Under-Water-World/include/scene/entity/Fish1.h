@@ -21,8 +21,8 @@ public:
         const char* fragmentShaderPath
     );
 
+    void update(float deltaTime, const Input& input);
     void update(float deltaTime, const Input& input, const glm::vec3& cameraForward);
-
     void render(const glm::mat4& view,
         const glm::mat4& projection,
         const glm::vec3& cameraPos,

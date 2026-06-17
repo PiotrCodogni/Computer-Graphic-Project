@@ -12,7 +12,8 @@ Camera::Camera()
     target   = glm::vec3(0.0f);
 
     // Kwaternion tożsamościowy = brak obrotu (kamera patrzy wzdłuż -Z)
-    orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+    currentPitch = 0.44f;
+    orientation = glm::angleAxis(currentPitch, glm::vec3(1.0f, 0.0f, 0.0f));
 
     orbitDistance = 4.0f;
     yawSpeed     = 2.0f;
@@ -32,61 +33,42 @@ Camera::Camera()
 
 void Camera::update(float deltaTime, const Input& input)
 {
-    
+    // 1. Yaw (poziom)
     float yawAngle = 0.0f;
-
-    // Strzalka w lewo - obrot kamery w prawo (wokol rybki)
-    if (input.isKeyPressed(GLFW_KEY_LEFT))
-        yawAngle += yawSpeed * deltaTime;
-
-    // Strzalka w prawo - obrot kamery w lewo
-    if (input.isKeyPressed(GLFW_KEY_RIGHT))
-        yawAngle -= yawSpeed * deltaTime;
+    if (input.isKeyPressed(GLFW_KEY_LEFT)) yawAngle += yawSpeed * deltaTime;
+    if (input.isKeyPressed(GLFW_KEY_RIGHT)) yawAngle -= yawSpeed * deltaTime;
 
     if (yawAngle != 0.0f)
     {
-        
         glm::quat yawQuat = glm::angleAxis(yawAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-       
         orientation = yawQuat * orientation;
     }
 
-    
-    float pitchAngle = 0.0f;
+    // 2. Pitch (pion) - poprawione
+    float pitchInput = 0.0f;
+    if (input.isKeyPressed(GLFW_KEY_UP)) pitchInput += pitchSpeed * deltaTime;
+    if (input.isKeyPressed(GLFW_KEY_DOWN)) pitchInput -= pitchSpeed * deltaTime;
 
-    // Strzalka w gore
-    if (input.isKeyPressed(GLFW_KEY_UP))
-        pitchAngle += pitchSpeed * deltaTime;
-
-    // Strzalka w dol 
-    if (input.isKeyPressed(GLFW_KEY_DOWN))
-        pitchAngle -= pitchSpeed * deltaTime;
-
-    if (pitchAngle != 0.0f)
+    if (pitchInput != 0.0f)
     {
-       
-        float currentPitch = getPitchFromOrientation();
-        float newPitch = currentPitch + pitchAngle;
-        newPitch = glm::clamp(newPitch, MIN_PITCH, MAX_PITCH);
-        pitchAngle = newPitch - currentPitch;
+        // Używamy zmiennej klasowej 'currentPitch' bez deklarowania jej ponownie
+        float newPitch = glm::clamp(currentPitch + pitchInput, MIN_PITCH, MAX_PITCH);
+        float delta = newPitch - currentPitch;
+        currentPitch = newPitch;
 
-        if (std::abs(pitchAngle) > 0.0001f)
-        {
-            
-            glm::vec3 localRight = orientation * glm::vec3(1.0f, 0.0f, 0.0f);
-            glm::quat pitchQuat = glm::angleAxis(pitchAngle, localRight);
-            orientation = pitchQuat * orientation;
-        }
+        // Rotacja w lokalnym układzie kamery
+        glm::vec3 localRight = orientation * glm::vec3(1.0f, 0.0f, 0.0f);
+        glm::quat pitchQuat = glm::angleAxis(delta, localRight);
+        orientation = pitchQuat * orientation;
     }
 
-    // Normalizacja kwaternionu - zapobiega narastaniu bledow numerycznych
     orientation = glm::normalize(orientation);
 
-    // Q - reset orientacji do pozycji startowej za graczem
+    // Q - reset
     if (input.isKeyPressed(GLFW_KEY_Q))
     {
-        glm::quat resetOrientation = glm::angleAxis(0.44f, glm::vec3(1.0f, 0.0f, 0.0f));
-       
+        currentPitch = 0.44f; // Resetujemy też stan zmiennej
+        glm::quat resetOrientation = glm::angleAxis(currentPitch, glm::vec3(1.0f, 0.0f, 0.0f));
         float t = glm::clamp(3.0f * deltaTime, 0.0f, 1.0f);
         orientation = glm::slerp(orientation, resetOrientation, t);
     }

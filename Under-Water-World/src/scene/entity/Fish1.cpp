@@ -22,29 +22,36 @@ bool Fish::init(const char* modPath, const char* texPath, const char* vShader, c
     if (!model.loadFromFile(modPath)) return false;
     return true;
 }
+void Fish::update(float deltaTime, const Input& input) {
+    // Wywo³ujemy drug¹ wersjê z domyœlnym wektorem patrzenia (np. w przód osi Z)
+    update(deltaTime, input, glm::vec3(0.0f, 0.0f, -1.0f));
+}
 
-void Fish::update(float dt, const Input& input) {
-    animationTime += dt;
+void Fish::update(float deltaTime, const Input& input, const glm::vec3& cameraForward) {
+    animationTime += deltaTime;
+
+    glm::vec3 forward = cameraForward;
+    glm::vec3 right = glm::vec3(-forward.z, 0.0f, forward.x);
     glm::vec3 moveDir(0.0f);
 
-    if (input.isKeyPressed(GLFW_KEY_W)) moveDir.z -= 1.0f;
-    if (input.isKeyPressed(GLFW_KEY_S)) moveDir.z += 1.0f;
-    if (input.isKeyPressed(GLFW_KEY_A)) moveDir.x -= 1.0f;
-    if (input.isKeyPressed(GLFW_KEY_D)) moveDir.x += 1.0f;
+    if (input.isKeyPressed(GLFW_KEY_W)) moveDir += forward;
+    if (input.isKeyPressed(GLFW_KEY_S)) moveDir -= forward;
+    if (input.isKeyPressed(GLFW_KEY_A)) moveDir -= right;
+    if (input.isKeyPressed(GLFW_KEY_D)) moveDir += right;
+
     if (input.isKeyPressed(GLFW_KEY_SPACE)) moveDir.y += 1.0f;
     if (input.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) moveDir.y -= 1.0f;
 
-    if (glm::length(moveDir) > 0.0f) {
+    if (glm::length(moveDir) > 0.001f) {
         moveDir = glm::normalize(moveDir);
-        position += moveDir * speed * dt;
+        position += moveDir * speed * deltaTime;
 
         glm::vec3 horizDir = glm::vec3(moveDir.x, 0.0f, moveDir.z);
-
-        if (glm::length(horizDir) > 0.0f) {
+        if (glm::length(horizDir) > 0.001f) {
             horizDir = glm::normalize(horizDir);
             float tgtYaw = std::atan2(-horizDir.x, -horizDir.z);
             glm::quat tgtRot = glm::angleAxis(tgtYaw, glm::vec3(0.0f, 1.0f, 0.0f));
-            float t = glm::clamp(rotationSpeed * dt, 0.0f, 1.0f);
+            float t = glm::clamp(rotationSpeed * deltaTime, 0.0f, 1.0f);
             rotation = glm::slerp(rotation, tgtRot, t);
         }
     }
@@ -64,7 +71,6 @@ void Fish::render(const glm::mat4& view, const glm::mat4& proj, const glm::vec3&
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modMat));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
-
     glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, glm::value_ptr(camPos));
     glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
     glUniform3fv(glGetUniformLocation(shaderProgram, "fogColor"), 1, glm::value_ptr(fogColor));

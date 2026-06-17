@@ -13,6 +13,8 @@ public:
     void followTarget(const glm::vec3& targetPosition);
     void update(float deltaTime, const Input& input);
 
+    
+
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix(float aspectRatio) const;
 
@@ -26,6 +28,7 @@ private:
     // Orientacja kamery przechowywana jako kwaternion
     // Eliminuje gimbal lock i zapewnia plynna interpolacje obrotow
     glm::quat orientation;
+    float currentPitch;
 
     float orbitDistance; // odleglosc od gracza
     float yawSpeed;     // predkosc obrotu poziomego 
