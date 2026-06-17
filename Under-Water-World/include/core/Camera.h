@@ -17,6 +17,7 @@ public:
     glm::mat4 getProjectionMatrix(float aspectRatio) const;
 
     glm::vec3 getPosition() const;
+    glm::vec3 getForwardDirection() const;
 
 private:
     glm::vec3 position;

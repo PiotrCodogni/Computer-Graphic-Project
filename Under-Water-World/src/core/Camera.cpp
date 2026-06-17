@@ -54,13 +54,13 @@ void Camera::update(float deltaTime, const Input& input)
     
     float pitchAngle = 0.0f;
 
-    // Strzalka w gore -
+    // Strzalka w gore
     if (input.isKeyPressed(GLFW_KEY_UP))
-        pitchAngle -= pitchSpeed * deltaTime;
+        pitchAngle += pitchSpeed * deltaTime;
 
     // Strzalka w dol 
     if (input.isKeyPressed(GLFW_KEY_DOWN))
-        pitchAngle += pitchSpeed * deltaTime;
+        pitchAngle -= pitchSpeed * deltaTime;
 
     if (pitchAngle != 0.0f)
     {
@@ -129,6 +129,19 @@ glm::mat4 Camera::getProjectionMatrix(float aspectRatio) const
 glm::vec3 Camera::getPosition() const
 {
     return position;
+}
+
+glm::vec3 Camera::getForwardDirection() const
+{
+    
+    glm::vec3 forward = orientation * glm::vec3(0.0f, 0.0f, -1.0f);
+
+    forward.y = 0.0f;
+    if (glm::length(forward) > 0.001f)
+        forward = glm::normalize(forward);
+    else
+        forward = glm::vec3(0.0f, 0.0f, -1.0f);
+    return forward;
 }
 
 float Camera::getPitchFromOrientation() const
