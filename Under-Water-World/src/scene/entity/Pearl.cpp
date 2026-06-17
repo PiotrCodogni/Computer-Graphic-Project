@@ -13,13 +13,7 @@ Pearl::Pearl()
     position = glm::vec3(2.0f, -2.0f, -4.0f);
     scale = 0.8f;
 
-    baseColor = glm::vec3(1.0f, 0.92f, 0.82f);
-
-    fresnelPower = 5.0f;
-    refractionRatio = 0.66f;
-    reflectionStrength = 0.9f;
-    refractionStrength = 0.18f;
-    f0 = 0.07f;
+    resetParameters();
 
     shaderProgram = 0;
 }
@@ -187,4 +181,44 @@ void Pearl::setPosition(const glm::vec3& newPosition)
 void Pearl::setScale(float newScale)
 {
     scale = newScale;
+}
+
+glm::vec3& Pearl::getBaseColor()
+{
+    return baseColor;
+}
+
+float& Pearl::getF0()
+{
+    return f0;
+}
+
+float& Pearl::getFresnelPower()
+{
+    return fresnelPower;
+}
+
+float& Pearl::getRefractionRatio()
+{
+    return refractionRatio;
+}
+
+float& Pearl::getReflectionStrength()
+{
+    return reflectionStrength;
+}
+
+float& Pearl::getRefractionStrength()
+{
+    return refractionStrength;
+}
+
+void Pearl::resetParameters()
+{
+    baseColor = glm::vec3(1.0f, 0.92f, 0.82f);
+    fresnelPower = 5.0f;
+    refractionRatio = 0.66f;
+    reflectionStrength = 0.9f;
+    refractionStrength = 0.18f;
+    f0 = 0.07f;
 }

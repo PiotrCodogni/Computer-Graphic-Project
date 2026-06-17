@@ -31,6 +31,14 @@ public:
     void setPosition(const glm::vec3& newPosition);
     void setScale(float newScale);
 
+    glm::vec3& getBaseColor();
+    float& getF0();
+    float& getFresnelPower();
+    float& getRefractionRatio();
+    float& getReflectionStrength();
+    float& getRefractionStrength();
+    void resetParameters();
+
 private:
     void generateSphere();
 

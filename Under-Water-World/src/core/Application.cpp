@@ -142,6 +142,29 @@ void Application::renderUi()
     ImGui::Text("Q - widok do przodu (reset kamery)");
     ImGui::Text("ESC - zamknij");
 
+    ImGui::Separator();
+    ImGui::Text("Pearl A13 Controls");
+
+    Pearl& pearl = scene.getPearl();
+    glm::vec3& pearlBaseColor = pearl.getBaseColor();
+    float& pearlF0 = pearl.getF0();
+    float& pearlFresnelPower = pearl.getFresnelPower();
+    float& pearlRefractionRatio = pearl.getRefractionRatio();
+    float& pearlReflectionStrength = pearl.getReflectionStrength();
+    float& pearlRefractionStrength = pearl.getRefractionStrength();
+
+    ImGui::ColorEdit3("Base color", &pearlBaseColor.x);
+    ImGui::SliderFloat("F0", &pearlF0, 0.0f, 1.0f);
+    ImGui::SliderFloat("Fresnel power", &pearlFresnelPower, 0.1f, 10.0f);
+    ImGui::SliderFloat("Refraction ratio", &pearlRefractionRatio, 0.1f, 1.5f);
+    ImGui::SliderFloat("Reflection strength", &pearlReflectionStrength, 0.0f, 2.0f);
+    ImGui::SliderFloat("Refraction strength", &pearlRefractionStrength, 0.0f, 2.0f);
+
+    if (ImGui::Button("Reset pearl parameters"))
+    {
+        pearl.resetParameters();
+    }
+
 
     ImGui::End();
 }
