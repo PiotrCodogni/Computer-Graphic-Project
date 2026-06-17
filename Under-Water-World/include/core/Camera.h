@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 class Input;
 
@@ -16,18 +17,28 @@ public:
     glm::mat4 getProjectionMatrix(float aspectRatio) const;
 
     glm::vec3 getPosition() const;
+    glm::vec3 getForwardDirection() const;
 
 private:
     glm::vec3 position;
     glm::vec3 target;
-    glm::vec3 up;
 
-    float yaw;           // kat orbity poziomej [radiany]
+    // Orientacja kamery przechowywana jako kwaternion
+    // Eliminuje gimbal lock i zapewnia plynna interpolacje obrotow
+    glm::quat orientation;
+
     float orbitDistance; // odleglosc od gracza
-    float orbitHeight;   // wysokosc kamery nad graczem
-    float rotateSpeed;   // predkosc obrotu [rad/s]
+    float yawSpeed;     // predkosc obrotu poziomego 
+    float pitchSpeed;   // predkosc obrotu pionowego 
 
     float fov;
     float zNear;
     float zFar;
+
+    
+    static constexpr float MIN_PITCH = -0.85f;  
+    static constexpr float MAX_PITCH =  0.85f;  
+
+    
+    float getPitchFromOrientation() const;
 };

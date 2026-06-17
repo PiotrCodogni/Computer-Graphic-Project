@@ -52,31 +52,35 @@ bool Fish::init(
     return true;
 }
 
-void Fish::update(float deltaTime, const Input& input)
+void Fish::update(float deltaTime, const Input& input, const glm::vec3& cameraForward)
 {
     animationTime += deltaTime;
+
+	
+    glm::vec3 forward = cameraForward;
+    glm::vec3 right = glm::vec3(-forward.z, 0.0f, forward.x);
 
 	// obliczanie kierunku ruchu na podstawie wciśniętych klawiszy
     glm::vec3 moveDirection(0.0f);
 
     if (input.isKeyPressed(GLFW_KEY_W))
     {
-        moveDirection.z -= 1.0f;
+        moveDirection += forward;
     }
 
     if (input.isKeyPressed(GLFW_KEY_S))
     {
-        moveDirection.z += 1.0f;
+        moveDirection -= forward;
     }
 
     if (input.isKeyPressed(GLFW_KEY_A))
     {
-        moveDirection.x -= 1.0f;
+        moveDirection -= right;
     }
 
     if (input.isKeyPressed(GLFW_KEY_D))
     {
-        moveDirection.x += 1.0f;
+        moveDirection += right;
     }
 
     if (input.isKeyPressed(GLFW_KEY_SPACE))
