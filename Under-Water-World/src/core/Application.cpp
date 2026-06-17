@@ -15,7 +15,7 @@ Application::Application()
 
 bool Application::init()
 {
-    if (!window.init(1024, 1024, "Under Water World"))
+    if (!window.init(1824, 1224, "Under Water World"))
     {
         return false;
     }

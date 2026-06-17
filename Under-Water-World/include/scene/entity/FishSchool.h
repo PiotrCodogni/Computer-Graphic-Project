@@ -37,13 +37,12 @@ public:
 
     void update(float deltaTime);
 
-    void render(
-        const glm::mat4& view,
+    void render(const glm::mat4& view,
         const glm::mat4& projection,
-        const glm::vec3& cameraPos,
-        const glm::vec3& fogColor,
-        float fogDensity
-    );
+        const glm::vec3& cameraPos, 
+        const glm::vec3& fogColor, 
+        float fogDensity, 
+        const glm::vec3& lightPos);
 
     void shutdown();
 

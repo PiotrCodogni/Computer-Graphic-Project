@@ -142,7 +142,10 @@ void Renderer::render(Scene& scene)
     // ------------------------------------------------------------------
     //  RYSOWANIE RYBKI GRACZA
     // ------------------------------------------------------------------
-    scene.getFish().render(view, projection);
+    scene.getFish().render(view, projection, cameraPos, lightPos, fogColor, fogDensity);
+
+
+    scene.getSchoolOfFish().render(view, projection, cameraPos, lightPos, fogColor, fogDensity);
 
 
     // ------------------------------------------------------------------
@@ -150,24 +153,23 @@ void Renderer::render(Scene& scene)
     // ------------------------------------------------------------------
     scene.getStonehenge().render(view, projection, sceneTime, cameraPos, fogColor, fogDensity, lightPos);
 
-
     // ------------------------------------------------------------------
     // RYSOWANIE LAWICY RYB
     // ------------------------------------------------------------------
-    scene.getFishSchool().render(view, projection, cameraPos, fogColor, fogDensity);
-
+    scene.getFishSchool().render(view, projection, cameraPos, fogColor, fogDensity, lightPos);
     // ------------------------------------------------------------------
     // RYSOWANIE POJEDYNCZYCH PLYWAJACYCH GDZIE NIEGDZIE RYBEK
     // ------------------------------------------------------------------
-    for (auto& stray : scene.getStrayFish())
-        stray.render(view, projection, cameraPos, fogColor, fogDensity);
-
+    for (auto& stray : scene.getStrayFish()) {
+        stray.render(view, projection, cameraPos, fogColor, fogDensity, lightPos);
+    }
     
     // RYSOWANIE POWIERZCHNI WODY (od spodu, z normal mappingiem)
     // Addytywne blending - woda rozjasnia scene zamiast ja zaslaniac
     
     GLuint waterSurfaceShader = scene.getWaterSurfaceShader();
     glUseProgram(waterSurfaceShader);
+
 
     glUniformMatrix4fv(glGetUniformLocation(waterSurfaceShader, "view"),       1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(waterSurfaceShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));

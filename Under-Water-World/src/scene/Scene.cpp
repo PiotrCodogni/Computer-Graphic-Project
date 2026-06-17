@@ -129,7 +129,11 @@ bool Scene::init()
         return false;
     }
 
-
+    school.init(
+        "assets/models/fish1.glb",
+        "assets/texture/fish1.png",
+        "shaders/Fish.vert",
+        "shaders/Fish.frag");
 
     if (!stonehenge.init(
         "assets/models/scene.gltf",
@@ -596,6 +600,7 @@ void Scene::update(float deltaTime, const Input& input)
     for (auto& stray : strayFish)
         stray.update(deltaTime);
     camera.update(deltaTime, input);
+    school.update(fish.getPosition(), deltaTime);
     camera.followTarget(fish.getPosition());
 }
 

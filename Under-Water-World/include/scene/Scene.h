@@ -6,6 +6,7 @@
 #include "core/Camera.h"
 #include "scene/entity/Fish1.h"
 #include "scene/entity/FishSchool.h"
+#include "scene/entity/SchoolOfFish.h"
 #include "scene/entity/Stonehenge.h"
 #include "graphics/Render_Utils.h"
 #include "graphics/Texture.h"
@@ -31,7 +32,6 @@ class Scene
 public:
     Scene();
 
-
     bool init();
     void update(float deltaTime, const Input& input);
     void shutdown();
@@ -39,6 +39,7 @@ public:
     Fish& getFish();
     FishSchool& getFishSchool() { return fishSchool; }
     std::vector<FishSchool>& getStrayFish() { return strayFish; }
+    SchoolOfFish& getSchoolOfFish() { return school; }
     Camera& getCamera();
     Stonehenge& getStonehenge();
     Pearl& getPearl();
@@ -47,17 +48,17 @@ public:
     const Core::RenderContext& getRockContext() const { return rockContext; }
     const Core::RenderContext& getAlgaeContext() const { return algaeContext; }
 
-    GLuint getSeabedShader()       const { return seabedShader;       }
-    GLuint getAlgaeShader()        const { return algaeShader;        }
-    GLuint getGodRaysShader()      const { return godRaysShader;      }
-    GLuint getRockNormalMapId()    const { return rockNormalMapId;    }
+    GLuint getSeabedShader()       const { return seabedShader; }
+    GLuint getAlgaeShader()        const { return algaeShader; }
+    GLuint getGodRaysShader()      const { return godRaysShader; }
+    GLuint getRockNormalMapId()    const { return rockNormalMapId; }
     GLuint getPearlEnvironmentMapId() const;
 
     const Core::RenderContext& getGodRaysQuad() const { return godRaysQuad; }
     const Core::RenderContext& getWaterSurfaceContext() const { return waterSurfaceContext; }
 
-    GLuint getWaterSurfaceShader()  const { return waterSurfaceShader;  }
-    GLuint getWaterNormalMapId()    const { return waterNormalMapId;    }
+    GLuint getWaterSurfaceShader()  const { return waterSurfaceShader; }
+    GLuint getWaterNormalMapId()    const { return waterNormalMapId; }
 
     const Texture& getSeabedTexture() const { return seabedTexture; }
     const Texture& getAlgaeTexture() const { return algaeTexture; }
@@ -67,11 +68,11 @@ public:
 
     float getSceneTime() const { return sceneTime; }
 
-
 private:
     Fish fish;
     FishSchool fishSchool;
     std::vector<FishSchool> strayFish;
+    SchoolOfFish school;
     Camera camera;
     Stonehenge stonehenge;
     Cubemap pearlEnvironmentMap;
@@ -87,7 +88,6 @@ private:
     GLuint algaeShader;
     GLuint godRaysShader;
     GLuint waterSurfaceShader;
-    // Proceduralna normalmapa dla kamienia generowana w Scene::init()
     GLuint rockNormalMapId;
     GLuint waterNormalMapId;
 

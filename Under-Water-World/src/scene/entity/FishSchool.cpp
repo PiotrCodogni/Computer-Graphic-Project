@@ -1,216 +1,120 @@
 #include "scene/entity/FishSchool.h"
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/constants.hpp>
-
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
 
-FishSchool::FishSchool()
-{
+FishSchool::FishSchool() {
     schoolCenter = glm::vec3(0.0f);
-    schoolTime   = 0.0f;
+    schoolTime = 0.0f;
     shaderProgram = 0;
 }
 
-bool FishSchool::init(
-    const char* modelPath,
-    const char* texturePath,
-    const char* vertexShaderPath,
-    const char* fragmentShaderPath,
-    int fishCount,
-    glm::vec3 centerPosition
-)
-{
-    schoolCenter = centerPosition;
+bool FishSchool::init(const char* modPath, const char* texPath, const char* vShader, const char* fShader, int fCount, glm::vec3 centPos) {
+    schoolCenter = centPos;
 
-    shaderProgram = shaderLoader.CreateProgram(vertexShaderPath, fragmentShaderPath);
-    if (shaderProgram == 0)
-    {
-        std::cout << "Failed to create fish school shader" << std::endl;
-        return false;
-    }
+    shaderProgram = shaderLoader.CreateProgram(vShader, fShader);
+    if (shaderProgram == 0) return false;
+    if (!texture.loadFromFile(texPath, true)) return false;
+    if (!model.loadFromFile(modPath)) return false;
 
-    if (!texture.loadFromFile(texturePath, true))
-    {
-        return false;
-    }
-
-    if (!model.loadFromFile(modelPath))
-    {
-        return false;
-    }
-
-    // Generowanie losowych rybek w lawicy
     std::srand(54321);
-    for (int i = 0; i < fishCount; ++i)
-    {
-        SchoolFishInstance fish;
+    for (int i = 0; i < fCount; ++i) {
+        SchoolFishInstance f;
 
-        // Kazda rybka krazy na swojej orbicie wokol centrum
-        float randFloat = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-        fish.orbitRadius = 3.0f + randFloat * 8.0f;
+        float rFlt = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        f.orbitRadius = 3.0f + rFlt * 8.0f;
 
-        randFloat = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-        fish.orbitAngle = randFloat * glm::two_pi<float>();
+        rFlt = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        f.orbitAngle = rFlt * glm::two_pi<float>();
 
-        randFloat = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-        fish.orbitSpeed = 0.15f + randFloat * 0.35f;
+        rFlt = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        f.orbitSpeed = 0.15f + rFlt * 0.35f;
 
-        // Losowy kierunek orbity (polowa plynie w lewo, polowa w prawo)
-        if (std::rand() % 2 == 0)
-            fish.orbitSpeed = -fish.orbitSpeed;
+        if (std::rand() % 2 == 0) f.orbitSpeed = -f.orbitSpeed;
 
-        randFloat = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-        fish.heightOffset = -2.0f + randFloat * 4.0f;
+        rFlt = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        f.heightOffset = -2.0f + rFlt * 4.0f;
 
-        randFloat = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-        fish.phaseOffset = randFloat * glm::two_pi<float>();
+        rFlt = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        f.phaseOffset = rFlt * glm::two_pi<float>();
 
-        randFloat = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-        fish.speed = 1.0f + randFloat * 1.5f;
+        rFlt = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        f.speed = 1.0f + rFlt * 1.5f;
 
-        randFloat = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-        fish.scale = 25.0f + randFloat * 20.0f;
+        rFlt = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        f.scale = 25.0f + rFlt * 20.0f;
 
-        // Poczatkowa pozycja na orbicie
-        fish.position = schoolCenter + glm::vec3(
-            fish.orbitRadius * std::cos(fish.orbitAngle),
-            fish.heightOffset,
-            fish.orbitRadius * std::sin(fish.orbitAngle)
-        );
+        f.position = schoolCenter + glm::vec3(f.orbitRadius * std::cos(f.orbitAngle), f.heightOffset, f.orbitRadius * std::sin(f.orbitAngle));
+        f.heading = 0.0f;
 
-        fish.heading = 0.0f;
-
-        fishList.push_back(fish);
+        fishList.push_back(f);
     }
-
     return true;
 }
 
-void FishSchool::update(float deltaTime)
-{
-    schoolTime += deltaTime;
+void FishSchool::update(float dt) {
+    schoolTime += dt;
 
-    // Delikatny ruch centrum lawicy - lawica powoli dryfuje
-    glm::vec3 driftCenter = schoolCenter;
-    driftCenter.x += std::sin(schoolTime * 0.05f) * 3.0f;
-    driftCenter.z += std::cos(schoolTime * 0.07f) * 3.0f;
-    driftCenter.y += std::sin(schoolTime * 0.1f) * 0.5f;
+    glm::vec3 dCent = schoolCenter;
+    dCent.x += std::sin(schoolTime * 0.05f) * 3.0f;
+    dCent.z += std::cos(schoolTime * 0.07f) * 3.0f;
+    dCent.y += std::sin(schoolTime * 0.1f) * 0.5f;
 
-    for (auto& fish : fishList)
-    {
-        // Ruch po orbicie
-        fish.orbitAngle += fish.orbitSpeed * deltaTime;
+    for (auto& f : fishList) {
+        f.orbitAngle += f.orbitSpeed * dt;
 
-        // Nowa pozycja na orbicie z lekkim falowaniem promienia
-        float currentRadius = fish.orbitRadius + std::sin(schoolTime * 0.3f + fish.phaseOffset) * 1.5f;
+        float cRad = f.orbitRadius + std::sin(schoolTime * 0.3f + f.phaseOffset) * 1.5f;
 
-        glm::vec3 newPos;
-        newPos.x = driftCenter.x + currentRadius * std::cos(fish.orbitAngle);
-        newPos.z = driftCenter.z + currentRadius * std::sin(fish.orbitAngle);
-        newPos.y = driftCenter.y + fish.heightOffset + std::sin(schoolTime * 0.5f + fish.phaseOffset) * 0.5f;
+        glm::vec3 nPos;
+        nPos.x = dCent.x + cRad * std::cos(f.orbitAngle);
+        nPos.z = dCent.z + cRad * std::sin(f.orbitAngle);
+        nPos.y = dCent.y + f.heightOffset + std::sin(schoolTime * 0.5f + f.phaseOffset) * 0.5f;
 
-        // Obliczanie kata obrotu - rybka patrzy w kierunku ruchu
-        glm::vec3 moveDir = newPos - fish.position;
-        if (glm::length(moveDir) > 0.001f)
-        {
-            fish.heading = std::atan2(moveDir.x, moveDir.z) + glm::pi<float>();
+        glm::vec3 mDir = nPos - f.position;
+        if (glm::length(mDir) > 0.001f) {
+            f.heading = std::atan2(mDir.x, mDir.z) + glm::pi<float>();
         }
 
-        fish.position = newPos;
+        f.position = nPos;
     }
 }
 
-void FishSchool::render(
-    const glm::mat4& view,
-    const glm::mat4& projection,
-    const glm::vec3& cameraPos,
-    const glm::vec3& fogColorVal,
-    float fogDensityVal
-)
-{
+void FishSchool::render(const glm::mat4& view, const glm::mat4& proj, const glm::vec3& camPos, const glm::vec3& fCol, float fDens, const glm::vec3& lightPos) {
     glUseProgram(shaderProgram);
 
-    glUniformMatrix4fv(
-        glGetUniformLocation(shaderProgram, "view"),
-        1, GL_FALSE, glm::value_ptr(view)
-    );
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, glm::value_ptr(camPos));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "fogColor"), 1, glm::value_ptr(fCol));
+    glUniform1f(glGetUniformLocation(shaderProgram, "fogDensity"), fDens);
 
-    glUniformMatrix4fv(
-        glGetUniformLocation(shaderProgram, "projection"),
-        1, GL_FALSE, glm::value_ptr(projection)
-    );
-
-    glUniform3fv(
-        glGetUniformLocation(shaderProgram, "cameraPos"),
-        1, glm::value_ptr(cameraPos)
-    );
-
-    glUniform3fv(
-        glGetUniformLocation(shaderProgram, "fogColor"),
-        1, glm::value_ptr(fogColorVal)
-    );
-
-    glUniform1f(
-        glGetUniformLocation(shaderProgram, "fogDensity"),
-        fogDensityVal
-    );
+    glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
 
     texture.bind(0);
     glUniform1i(glGetUniformLocation(shaderProgram, "colorTexture"), 0);
 
-    for (const auto& fish : fishList)
-    {
-        // Czas animacji ogona - kazda rybka ma inne przesuniecie fazy
-        glUniform1f(
-            glGetUniformLocation(shaderProgram, "time"),
-            schoolTime + fish.phaseOffset
-        );
+    for (const auto& f : fishList) {
+        glUniform1f(glGetUniformLocation(shaderProgram, "time"), schoolTime + f.phaseOffset);
 
-        glm::mat4 modelMatrix = glm::mat4(1.0f);
+        glm::mat4 modMat = glm::mat4(1.0f);
+        modMat = glm::translate(modMat, f.position);
+        modMat = glm::rotate(modMat, f.heading, glm::vec3(0.0f, 1.0f, 0.0f));
+        modMat = glm::scale(modMat, glm::vec3(f.scale));
+        modMat = glm::rotate(modMat, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        modMat = glm::rotate(modMat, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-        modelMatrix = glm::translate(modelMatrix, fish.position);
-
-        // Obrot w kierunku ruchu
-        modelMatrix = glm::rotate(
-            modelMatrix,
-            fish.heading,
-            glm::vec3(0.0f, 1.0f, 0.0f)
-        );
-
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(fish.scale));
-
-        // Orientacja modelu (tak samo jak gracz)
-        modelMatrix = glm::rotate(
-            modelMatrix,
-            glm::radians(90.0f),
-            glm::vec3(0.0f, 1.0f, 0.0f)
-        );
-
-        modelMatrix = glm::rotate(
-            modelMatrix,
-            glm::radians(90.0f),
-            glm::vec3(1.0f, 0.0f, 0.0f)
-        );
-
-        glUniformMatrix4fv(
-            glGetUniformLocation(shaderProgram, "model"),
-            1, GL_FALSE, glm::value_ptr(modelMatrix)
-        );
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modMat));
 
         model.draw();
     }
 }
 
-void FishSchool::shutdown()
-{
+void FishSchool::shutdown() {
     texture.shutdown();
-
-    if (shaderProgram != 0)
-    {
+    if (shaderProgram != 0) {
         shaderLoader.DeleteProgram(shaderProgram);
         shaderProgram = 0;
     }

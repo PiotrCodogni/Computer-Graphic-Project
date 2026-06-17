@@ -31,6 +31,7 @@
     <ClInclude Include="include\scene\entity\Fish1.h" />
     <ClInclude Include="include\scene\entity\FishSchool.h" />
     <ClInclude Include="include\scene\entity\Pearl.h" />
+    <ClInclude Include="include\scene\entity\SchoolOfFish.h" />
     <CLInclude Include="include\scene\entity\Stonehenge.h" />
     <ClInclude Include="include\scene\Scene.h" />
   </ItemGroup>
@@ -52,6 +53,7 @@
     <ClCompile Include="src\scene\entity\Fish1.cpp" />
     <ClCompile Include="src\scene\entity\FishSchool.cpp" />
     <ClCompile Include="src\scene\entity\Pearl.cpp" />
+    <ClCompile Include="src\scene\entity\SchoolOfFish.cpp" />
     <ClCompile Include="src\scene\entity\Stonehenge.cpp" />
     <ClCompile Include="src\scene\Scene.cpp" />
   </ItemGroup>
