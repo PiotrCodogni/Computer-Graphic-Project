@@ -595,7 +595,8 @@ bool Scene::init()
 void Scene::update(float deltaTime, const Input& input)
 {
     sceneTime += deltaTime;
-    fish.update(deltaTime, input);
+    glm::vec3 camForward = camera.getForwardDirection();
+    fish.update(deltaTime, input, camForward);
     fishSchool.update(deltaTime);
     for (auto& stray : strayFish)
         stray.update(deltaTime);
