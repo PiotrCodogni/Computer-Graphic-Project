@@ -11,6 +11,7 @@
 #include "graphics/Render_Utils.h"
 #include "graphics/Texture.h"
 #include "graphics/Shader.h"
+#include "graphics/Skybox.h"
 #include <vector>
 #include <glm/glm.hpp>
 
@@ -43,6 +44,9 @@ public:
     Camera& getCamera();
     Stonehenge& getStonehenge();
     Pearl& getPearl();
+    Skybox& getSkybox() { return skybox; }
+    bool isSkyboxVisible() const { return showSkybox; }
+    bool& getShowSkyboxRef() { return showSkybox; }
 
     const Core::RenderContext& getSeabedContext() const { return seabedContext; }
     const Core::RenderContext& getRockContext() const { return rockContext; }
@@ -77,6 +81,7 @@ private:
     Stonehenge stonehenge;
     Cubemap pearlEnvironmentMap;
     Pearl pearl;
+    Skybox skybox;
 
     Core::RenderContext seabedContext;
     Core::RenderContext rockContext;
@@ -100,4 +105,5 @@ private:
     std::vector<AlgaeInstance> algaeList;
 
     float sceneTime;
+    bool showSkybox;
 };

@@ -110,6 +110,7 @@ Scene::Scene()
     waterSurfaceShader= 0;
     rockNormalMapId   = 0;
     waterNormalMapId  = 0;
+    showSkybox        = true;
 }
 
 float getSeabedHeight(float x, float z)
@@ -156,6 +157,19 @@ bool Scene::init()
         }))
     {
         std::cout << "Failed to load pearl environment cubemap" << std::endl;
+        return false;
+    }
+
+    if (!skybox.init({
+        "assets/skybox/right.png",
+        "assets/skybox/left.png",
+        "assets/skybox/top.png",
+        "assets/skybox/bottom.png",
+        "assets/skybox/front.png",
+        "assets/skybox/back.png"
+    }))
+    {
+        std::cout << "Failed to load underwater skybox" << std::endl;
         return false;
     }
 
@@ -616,6 +630,7 @@ void Scene::shutdown()
     algaeTexture.shutdown();
     pearl.shutdown();
     pearlEnvironmentMap.shutdown();
+    skybox.shutdown();
     
 
     if (seabedShader != 0)

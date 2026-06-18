@@ -43,6 +43,9 @@
     <ClInclude Include="include\graphics\Cubemap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\graphics\Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -102,6 +105,9 @@
     <ClCompile Include="src\scene\entity\Pearl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\Skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />
@@ -150,6 +156,12 @@
     <None Include="shaders\pearl.vert">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="shaders\skybox.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\skybox.vert">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -185,6 +197,24 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="assets\environment\pearl\top.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\skybox\back.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\skybox\bottom.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\skybox\front.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\skybox\left.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\skybox\right.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\skybox\top.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

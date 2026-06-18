@@ -135,6 +135,9 @@ void Application::renderUi()
         fishPosition.z
     );
 
+    bool& showSkybox = scene.getShowSkyboxRef();
+    ImGui::Checkbox("Show skybox", &showSkybox);
+
     ImGui::Text("W-A-S-D - ruch");
     ImGui::Text("Space / Left Shift - gora / dol");
     ImGui::Text("Strzalki lewo/prawo - obrot kamery");

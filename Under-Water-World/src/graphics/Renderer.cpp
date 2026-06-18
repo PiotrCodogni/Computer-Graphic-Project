@@ -43,6 +43,11 @@ void Renderer::render(Scene& scene)
     // Slonce nad powierzchnia wody
     glm::vec3 lightPos = glm::vec3(-200.19f, 290.01f, -24.38f);
 
+    if (scene.isSkyboxVisible())
+    {
+        scene.getSkybox().render(view, projection);
+    }
+
     float sceneTime = scene.getSceneTime();
 
     // ------------------------------------------------------------------

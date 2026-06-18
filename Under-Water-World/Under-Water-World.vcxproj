@@ -26,6 +26,7 @@
     <ClInclude Include="include\graphics\Model.h" />
     <ClInclude Include="include\graphics\Renderer.h" />
     <ClInclude Include="include\graphics\Shader.h" />
+    <ClInclude Include="include\graphics\Skybox.h" />
     <ClInclude Include="include\graphics\Render_Utils.h" />
     <ClInclude Include="include\graphics\Texture.h" />
     <ClInclude Include="include\scene\entity\Fish1.h" />
@@ -48,6 +49,7 @@
     <ClCompile Include="src\graphics\Renderer.cpp" />
     <ClCompile Include="src\graphics\Render_Utils.cpp" />
     <ClCompile Include="src\graphics\Shader.cpp" />
+    <ClCompile Include="src\graphics\Skybox.cpp" />
     <ClCompile Include="src\graphics\Texture.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\scene\entity\Fish1.cpp" />
@@ -72,6 +74,8 @@
     <None Include="shaders\pearl.vert" />
     <None Include="shaders\seabed.frag" />
     <None Include="shaders\seabed.vert" />
+    <None Include="shaders\skybox.frag" />
+    <None Include="shaders\skybox.vert" />
     <None Include="shaders\Stonehenge.frag" />
     <None Include="shaders\Stonehenge.vert" />
   </ItemGroup>
@@ -82,6 +86,12 @@
     <Image Include="assets\environment\pearl\left.png" />
     <Image Include="assets\environment\pearl\right.png" />
     <Image Include="assets\environment\pearl\top.png" />
+    <Image Include="assets\skybox\back.png" />
+    <Image Include="assets\skybox\bottom.png" />
+    <Image Include="assets\skybox\front.png" />
+    <Image Include="assets\skybox\left.png" />
+    <Image Include="assets\skybox\right.png" />
+    <Image Include="assets\skybox\top.png" />
     <Image Include="assets\texture\fish1.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
