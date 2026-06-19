@@ -13,6 +13,7 @@ uniform float time;
 
 out vec2 texCoord;
 out vec3 fragPos;
+out vec3 fragNormal;
 
 void main()
 {
@@ -26,6 +27,7 @@ void main()
 
     texCoord = vertexTexCoord;
     fragPos = vec3(model * vec4(pos, 1.0));
+    fragNormal = mat3(transpose(inverse(model))) * vertexNormal;
 
     gl_Position = projection * view * vec4(fragPos, 1.0);
 }
