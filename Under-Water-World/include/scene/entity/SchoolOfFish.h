@@ -29,7 +29,9 @@ public:
 private:
     Model model;
     Texture texture;
+    float currentProgress;
     GLuint shaderProgram;
+    std::vector<float> fishProgress;
     Core::Shader_Loader shaderLoader;
 
     std::vector<glm::vec3> pathHistory;
