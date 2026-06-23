@@ -44,7 +44,9 @@ public:
     SchoolOfFish& getSchoolOfFish() { return school; }
     Camera& getCamera();
     Stonehenge& getStonehenge();
+    Coral& getVerrucosa() { return verrucosa; }
     std::vector<Coral>& getCorals() { return corals; }
+
     Pearl& getPearl();
     Skybox& getSkybox() { return skybox; }
     bool isSkyboxVisible() const { return showSkybox; }
@@ -85,8 +87,10 @@ private:
     Stonehenge stonehenge;
     Cubemap pearlEnvironmentMap;
     Pearl pearl;
+
     Skybox skybox;
     std::vector<Coral> corals;
+    Coral verrucosa;\
 
     Core::RenderContext seabedContext;
     Core::RenderContext rockContext;

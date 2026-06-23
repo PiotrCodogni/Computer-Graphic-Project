@@ -195,6 +195,22 @@ bool Scene::init()
         corals.push_back(std::move(c));
     }
 
+
+    if (!verrucosa.init(
+        "assets/models/verrucosa/scene.gltf",
+        "shaders/coral.vert",
+        "shaders/coral.frag"
+    ))
+    {
+        std::cout << "Failed to load Verrucosa" << std::endl;
+        return false;
+    }
+
+    verrucosa.setPosition(glm::vec3(-9.95f, 0.0f, -37.74f));
+    verrucosa.setRotation(glm::vec3(-189.0f, 0.0f, 0.0f));
+    verrucosa.setScale(0.5f);
+
+    
     if (!pearlEnvironmentMap.loadFromFiles({
     "assets/environment/pearl/right.png",
     "assets/environment/pearl/left.png",
@@ -657,14 +673,17 @@ void Scene::update(float deltaTime, const Input& input)
     glm::vec3 camForward = camera.getForwardDirection();
     fish.update(deltaTime, input, camForward);
     fishSchool.update(deltaTime);
+    verrucosa.update(deltaTime, input);
     for (auto& stray : strayFish)
         stray.update(deltaTime);
+
     camera.update(deltaTime, input);
     school.update(fish.getPosition(), deltaTime);
     camera.followTarget(fish.getPosition());
 
     for (auto& c : corals)
         c.update(deltaTime, input);
+
 }
 
 void Scene::shutdown()
@@ -674,13 +693,19 @@ void Scene::shutdown()
     for (auto& stray : strayFish)
         stray.shutdown();
     stonehenge.shutdown();
+
+
     for (auto& c : corals)
         c.shutdown();
+
+
+
     seabedTexture.shutdown();
     algaeTexture.shutdown();
     pearl.shutdown();
     pearlEnvironmentMap.shutdown();
     skybox.shutdown();
+    verrucosa.shutdown();
 
 
     if (seabedShader != 0)

@@ -122,6 +122,7 @@ void Renderer::render(Scene& scene)
         scene.getPearl().renderDepth(shadowDepthShader, lightSpaceMatrix);
         scene.getFish().renderDepth(shadowDepthFishShader, lightSpaceMatrix);
         scene.getSchoolOfFish().renderDepth(shadowDepthFishShader, lightSpaceMatrix);
+        scene.getVerrucosa().renderDepth(shadowDepthShader, lightSpaceMatrix);
         scene.getFishSchool().renderDepth(shadowDepthFishShader, lightSpaceMatrix);
         for (auto& c : scene.getCorals())
         {
@@ -131,7 +132,7 @@ void Renderer::render(Scene& scene)
         {
             stray.renderDepth(shadowDepthFishShader, lightSpaceMatrix);
         }
-
+        
         glUseProgram(shadowDepthAlgaeShader);
         glUniformMatrix4fv(glGetUniformLocation(shadowDepthAlgaeShader, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
         glUniform1f(glGetUniformLocation(shadowDepthAlgaeShader, "time"), scene.getSceneTime());
@@ -290,6 +291,10 @@ void Renderer::render(Scene& scene)
         c.render(view, projection, sceneTime, cameraPos, fogColor, fogDensity, lightPos);
     }
 
+
+    scene.getVerrucosa().render(view, projection, sceneTime, cameraPos, fogColor, fogDensity, lightPos);
+
+    
     // ------------------------------------------------------------------
     // RYSOWANIE POJEDYNCZYCH PLYWAJACYCH GDZIE NIEGDZIE RYBEK
     // ------------------------------------------------------------------
