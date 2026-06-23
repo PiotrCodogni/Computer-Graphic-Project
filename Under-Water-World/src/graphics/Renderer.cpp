@@ -123,6 +123,10 @@ void Renderer::render(Scene& scene)
         scene.getFish().renderDepth(shadowDepthFishShader, lightSpaceMatrix);
         scene.getSchoolOfFish().renderDepth(shadowDepthFishShader, lightSpaceMatrix);
         scene.getFishSchool().renderDepth(shadowDepthFishShader, lightSpaceMatrix);
+        for (auto& c : scene.getCorals())
+        {
+            c.renderDepth(shadowDepthShader, lightSpaceMatrix);
+        }
         for (auto& stray : scene.getStrayFish())
         {
             stray.renderDepth(shadowDepthFishShader, lightSpaceMatrix);
@@ -280,6 +284,11 @@ void Renderer::render(Scene& scene)
     // RYSOWANIE LAWICY RYB
     // ------------------------------------------------------------------
     scene.getFishSchool().render(view, projection, cameraPos, fogColor, fogDensity, lightPos, lightSpaceMatrix, depthMap, scene.areShadowsEnabled());
+
+    for (auto& c : scene.getCorals())
+    {
+        c.render(view, projection, sceneTime, cameraPos, fogColor, fogDensity, lightPos);
+    }
 
     // ------------------------------------------------------------------
     // RYSOWANIE POJEDYNCZYCH PLYWAJACYCH GDZIE NIEGDZIE RYBEK

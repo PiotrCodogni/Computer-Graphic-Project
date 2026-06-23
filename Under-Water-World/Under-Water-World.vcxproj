@@ -29,6 +29,7 @@
     <ClInclude Include="include\graphics\Skybox.h" />
     <ClInclude Include="include\graphics\Render_Utils.h" />
     <ClInclude Include="include\graphics\Texture.h" />
+    <ClInclude Include="include\scene\entity\Coral.h" />
     <ClInclude Include="include\scene\entity\Fish1.h" />
     <ClInclude Include="include\scene\entity\FishSchool.h" />
     <ClInclude Include="include\scene\entity\Pearl.h" />
@@ -52,6 +53,7 @@
     <ClCompile Include="src\graphics\Skybox.cpp" />
     <ClCompile Include="src\graphics\Texture.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\scene\entity\Coral.cpp" />
     <ClCompile Include="src\scene\entity\Fish1.cpp" />
     <ClCompile Include="src\scene\entity\FishSchool.cpp" />
     <ClCompile Include="src\scene\entity\Pearl.cpp" />
@@ -66,6 +68,8 @@
     <None Include="shaders\algae.vert" />
     <None Include="shaders\basic.frag" />
     <None Include="shaders\basic.vert" />
+    <None Include="shaders\coral.frag" />
+    <None Include="shaders\coral.vert" />
     <None Include="shaders\fish.frag" />
     <None Include="shaders\fish.vert" />
     <None Include="shaders\godrays.frag" />
