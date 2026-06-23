@@ -110,7 +110,7 @@ Scene::Scene()
     waterSurfaceShader= 0;
     rockNormalMapId   = 0;
     waterNormalMapId  = 0;
-    showSkybox        = true;
+    showSkybox        = false;
 }
 
 float getSeabedHeight(float x, float z)
