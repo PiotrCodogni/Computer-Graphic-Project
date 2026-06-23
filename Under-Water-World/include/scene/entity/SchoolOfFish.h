@@ -3,6 +3,7 @@
 #include "graphics/Shader.h"
 #include "graphics/Texture.h"
 #include <vector>
+#include <GL/glew.h>
 #include <glm/glm.hpp>
 
 struct PTFrame {
@@ -22,7 +23,11 @@ public:
         const glm::vec3& camPos, 
         const glm::vec3& lightPos, 
         const glm::vec3& fogColor, 
-        float fogDensity);
+        float fogDensity,
+        const glm::mat4& lightSpaceMatrix,
+        GLuint shadowMap,
+        bool useShadows);
+    void renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatrix);
     void shutdown();
     float animationTime = 0.0f;
 
@@ -38,4 +43,5 @@ private:
     std::vector<PTFrame> frames;
 
     void updateFrames();
+    glm::mat4 getFishModelMatrix(const PTFrame& frame) const;
 };

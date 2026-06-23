@@ -29,6 +29,8 @@ public:
         glm::vec3 lightPos
     );
 
+    void renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatrix);
+
     void shutdown();
 
     glm::vec3 getPosition() const;
@@ -39,6 +41,8 @@ public:
     void setPivotOffset(glm::vec3 offset);
 
 private:
+    glm::mat4 getModelMatrix() const;
+
     glm::vec3 position;
     float scale;
     glm::vec3 rotation;

@@ -59,3 +59,11 @@ void Model::draw()
         Core::DrawContext(mesh.context);
     }
 }
+
+void Model::drawDepth()
+{
+    for (auto& mesh : meshes)
+    {
+        Core::DrawContext(mesh.context);
+    }
+}

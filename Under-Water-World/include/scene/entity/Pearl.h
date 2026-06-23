@@ -23,8 +23,13 @@ public:
         GLuint cubemapTextureId,
         float time,
         const glm::vec3& fogColor,
-        float fogDensity
+        float fogDensity,
+        const glm::mat4& lightSpaceMatrix,
+        GLuint shadowMap,
+        bool useShadows
     );
+
+    void renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatrix);
 
     void shutdown();
 
@@ -41,6 +46,7 @@ public:
 
 private:
     void generateSphere();
+    glm::mat4 getModelMatrix() const;
 
 private:
     glm::vec3 position;

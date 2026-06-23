@@ -138,6 +138,9 @@ void Application::renderUi()
     bool& showSkybox = scene.getShowSkyboxRef();
     ImGui::Checkbox("Show skybox", &showSkybox);
 
+    bool& showShadows = scene.getShowShadowsRef();
+    ImGui::Checkbox("Enable shadow mapping", &showShadows);
+
     ImGui::Text("W-A-S-D - ruch");
     ImGui::Text("Space / Left Shift - gora / dol");
     ImGui::Text("Strzalki lewo/prawo - obrot kamery");

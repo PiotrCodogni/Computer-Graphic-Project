@@ -47,6 +47,8 @@ public:
     Skybox& getSkybox() { return skybox; }
     bool isSkyboxVisible() const { return showSkybox; }
     bool& getShowSkyboxRef() { return showSkybox; }
+    bool areShadowsEnabled() const { return showShadows; }
+    bool& getShowShadowsRef() { return showShadows; }
 
     const Core::RenderContext& getSeabedContext() const { return seabedContext; }
     const Core::RenderContext& getRockContext() const { return rockContext; }
@@ -106,4 +108,5 @@ private:
 
     float sceneTime;
     bool showSkybox;
+    bool showShadows;
 };

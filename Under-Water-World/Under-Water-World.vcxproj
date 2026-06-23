@@ -74,6 +74,11 @@
     <None Include="shaders\pearl.vert" />
     <None Include="shaders\seabed.frag" />
     <None Include="shaders\seabed.vert" />
+    <None Include="shaders\shadow_depth_algae.frag" />
+    <None Include="shaders\shadow_depth_algae.vert" />
+    <None Include="shaders\shadow_depth.frag" />
+    <None Include="shaders\shadow_depth_fish.vert" />
+    <None Include="shaders\shadow_depth.vert" />
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />
     <None Include="shaders\Stonehenge.frag" />

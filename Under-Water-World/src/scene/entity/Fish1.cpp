@@ -23,7 +23,7 @@ bool Fish::init(const char* modPath, const char* texPath, const char* vShader, c
     return true;
 }
 void Fish::update(float deltaTime, const Input& input) {
-    // Wywo³ujemy drug¹ wersjê z domyœlnym wektorem patrzenia (np. w przód osi Z)
+    // Wywoï¿½ujemy drugï¿½ wersjï¿½ z domyï¿½lnym wektorem patrzenia (np. w przï¿½d osi Z)
     update(deltaTime, input, glm::vec3(0.0f, 0.0f, -1.0f));
 }
 
@@ -57,32 +57,80 @@ void Fish::update(float deltaTime, const Input& input, const glm::vec3& cameraFo
     }
 }
 
-void Fish::render(const glm::mat4& view, const glm::mat4& proj, const glm::vec3& camPos, const glm::vec3& lightPos, const glm::vec3& fogColor, float fogDensity) {
+void Fish::render(
+    const glm::mat4& view,
+    const glm::mat4& projection,
+    const glm::vec3& cameraPos,
+    const glm::vec3& lightPos,
+    const glm::vec3& fogColor,
+    float fogDensity,
+    const glm::mat4& lightSpaceMatrix,
+    GLuint shadowMap,
+    bool useShadows
+)
+{
     glUseProgram(shaderProgram);
     glUniform1f(glGetUniformLocation(shaderProgram, "time"), animationTime);
 
-    glm::mat4 modMat = glm::mat4(1.0f);
-    modMat = glm::translate(modMat, position);
-    modMat *= glm::mat4_cast(rotation);
-    modMat = glm::scale(modMat, glm::vec3(scale));
-    modMat = glm::rotate(modMat, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    modMat = glm::rotate(modMat, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::mat4 modelMatrix = getModelMatrix();
 
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modMat));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, glm::value_ptr(camPos));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, glm::value_ptr(cameraPos));
     glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
     glUniform3fv(glGetUniformLocation(shaderProgram, "fogColor"), 1, glm::value_ptr(fogColor));
     glUniform1f(glGetUniformLocation(shaderProgram, "fogDensity"), fogDensity);
+    glUniform1i(glGetUniformLocation(shaderProgram, "useShadows"), useShadows ? 1 : 0);
 
     texture.bind(0);
     glUniform1i(glGetUniformLocation(shaderProgram, "colorTexture"), 0);
 
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, shadowMap);
+    glUniform1i(glGetUniformLocation(shaderProgram, "shadowMap"), 5);
+
     model.draw();
 }
 
-void Fish::shutdown() {
+void Fish::renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatrix)
+{
+    glUseProgram(depthShader);
+
+    glm::mat4 modelMatrix = getModelMatrix();
+    glUniformMatrix4fv(glGetUniformLocation(depthShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(depthShader, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+    glUniform1f(glGetUniformLocation(depthShader, "time"), animationTime);
+
+    model.drawDepth();
+}
+
+glm::mat4 Fish::getModelMatrix() const
+{
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix *= glm::mat4_cast(rotation);
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
+
+    modelMatrix = glm::rotate(
+        modelMatrix,
+        glm::radians(90.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    modelMatrix = glm::rotate(
+        modelMatrix,
+        glm::radians(-90.0f),
+        glm::vec3(1.0f, 0.0f, 0.0f)
+    );
+
+    return modelMatrix;
+}
+
+void Fish::shutdown()
+{
     texture.shutdown();
     if (shaderProgram != 0) {
         shaderLoader.DeleteProgram(shaderProgram);

@@ -14,6 +14,7 @@ public:
     Model();
     bool loadFromFile(const char* path);
     void draw();
+    void drawDepth();
 
 private:
     std::vector<MeshData> meshes;

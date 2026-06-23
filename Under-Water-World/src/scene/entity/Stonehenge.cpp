@@ -55,13 +55,7 @@ void Stonehenge::render(
 {
     glUseProgram(shaderProgram);
 
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::translate(modelMatrix, position);
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-    modelMatrix = glm::translate(modelMatrix, pivotOffset);
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
+    glm::mat4 modelMatrix = getModelMatrix();
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
@@ -75,6 +69,29 @@ void Stonehenge::render(
     glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
 
     model.draw();
+}
+
+void Stonehenge::renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatrix)
+{
+    glUseProgram(depthShader);
+
+    glm::mat4 modelMatrix = getModelMatrix();
+    glUniformMatrix4fv(glGetUniformLocation(depthShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(depthShader, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+    model.drawDepth();
+}
+
+glm::mat4 Stonehenge::getModelMatrix() const
+{
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    modelMatrix = glm::translate(modelMatrix, pivotOffset);
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
+    return modelMatrix;
 }
 
 void Stonehenge::shutdown()

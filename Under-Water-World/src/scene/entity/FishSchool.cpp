@@ -82,37 +82,104 @@ void FishSchool::update(float dt) {
     }
 }
 
-void FishSchool::render(const glm::mat4& view, const glm::mat4& proj, const glm::vec3& camPos, const glm::vec3& fCol, float fDens, const glm::vec3& lightPos) {
+void FishSchool::render(
+    const glm::mat4& view,
+    const glm::mat4& projection,
+    const glm::vec3& cameraPos,
+    const glm::vec3& fogColorVal,
+    float fogDensityVal,
+    const glm::vec3& lightPos,
+    const glm::mat4& lightSpaceMatrix,
+    GLuint shadowMap,
+    bool useShadows
+)
+{
     glUseProgram(shaderProgram);
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, glm::value_ptr(camPos));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "fogColor"), 1, glm::value_ptr(fCol));
-    glUniform1f(glGetUniformLocation(shaderProgram, "fogDensity"), fDens);
-
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, glm::value_ptr(cameraPos));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "fogColor"), 1, glm::value_ptr(fogColorVal));
+    glUniform1f(glGetUniformLocation(shaderProgram, "fogDensity"), fogDensityVal);
     glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+    glUniform1i(glGetUniformLocation(shaderProgram, "useShadows"), useShadows ? 1 : 0);
 
     texture.bind(0);
     glUniform1i(glGetUniformLocation(shaderProgram, "colorTexture"), 0);
 
-    for (const auto& f : fishList) {
-        glUniform1f(glGetUniformLocation(shaderProgram, "time"), schoolTime + f.phaseOffset);
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, shadowMap);
+    glUniform1i(glGetUniformLocation(shaderProgram, "shadowMap"), 5);
 
-        glm::mat4 modMat = glm::mat4(1.0f);
-        modMat = glm::translate(modMat, f.position);
-        modMat = glm::rotate(modMat, f.heading, glm::vec3(0.0f, 1.0f, 0.0f));
-        modMat = glm::scale(modMat, glm::vec3(f.scale));
-        modMat = glm::rotate(modMat, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        modMat = glm::rotate(modMat, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    for (const auto& fish : fishList)
+    {
+        // Czas animacji ogona - kazda rybka ma inne przesuniecie fazy
+        glUniform1f(
+            glGetUniformLocation(shaderProgram, "time"),
+            schoolTime + fish.phaseOffset
+        );
 
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modMat));
+        glm::mat4 modelMatrix = getFishModelMatrix(fish);
+
+        glUniformMatrix4fv(
+            glGetUniformLocation(shaderProgram, "model"),
+            1, GL_FALSE, glm::value_ptr(modelMatrix)
+        );
 
         model.draw();
     }
 }
 
-void FishSchool::shutdown() {
+void FishSchool::renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatrix)
+{
+    glUseProgram(depthShader);
+    glUniformMatrix4fv(glGetUniformLocation(depthShader, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+    for (const auto& fish : fishList)
+    {
+        glUniform1f(glGetUniformLocation(depthShader, "time"), schoolTime + fish.phaseOffset);
+
+        glm::mat4 modelMatrix = getFishModelMatrix(fish);
+        glUniformMatrix4fv(glGetUniformLocation(depthShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+        model.drawDepth();
+    }
+}
+
+glm::mat4 FishSchool::getFishModelMatrix(const SchoolFishInstance& fish) const
+{
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+
+    modelMatrix = glm::translate(modelMatrix, fish.position);
+
+    // Obrot w kierunku ruchu
+    modelMatrix = glm::rotate(
+        modelMatrix,
+        fish.heading,
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(fish.scale));
+
+    // Orientacja modelu (tak samo jak gracz)
+    modelMatrix = glm::rotate(
+        modelMatrix,
+        glm::radians(90.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    modelMatrix = glm::rotate(
+        modelMatrix,
+        glm::radians(-90.0f),
+        glm::vec3(1.0f, 0.0f, 0.0f)
+    );
+
+    return modelMatrix;
+}
+
+void FishSchool::shutdown()
+{
     texture.shutdown();
     if (shaderProgram != 0) {
         shaderLoader.DeleteProgram(shaderProgram);

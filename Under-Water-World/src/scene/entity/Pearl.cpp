@@ -97,14 +97,15 @@ void Pearl::render(
     GLuint cubemapTextureId,
     float time,
     const glm::vec3& fogColor,
-    float fogDensity
+    float fogDensity,
+    const glm::mat4& lightSpaceMatrix,
+    GLuint shadowMap,
+    bool useShadows
 )
 {
     glUseProgram(shaderProgram);
 
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::translate(modelMatrix, position);
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
+    glm::mat4 modelMatrix = getModelMatrix();
 
     glUniformMatrix4fv(
         glGetUniformLocation(shaderProgram, "model"),
@@ -145,6 +146,8 @@ void Pearl::render(
     glUniform1f(glGetUniformLocation(shaderProgram, "reflectionStrength"), reflectionStrength);
     glUniform1f(glGetUniformLocation(shaderProgram, "refractionStrength"), refractionStrength);
     glUniform1f(glGetUniformLocation(shaderProgram, "time"), time);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+    glUniform1i(glGetUniformLocation(shaderProgram, "useShadows"), useShadows ? 1 : 0);
 
     glUniform3fv(
         glGetUniformLocation(shaderProgram, "fogColor"),
@@ -161,7 +164,30 @@ void Pearl::render(
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureId);
     glUniform1i(glGetUniformLocation(shaderProgram, "environmentMap"), 0);
 
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, shadowMap);
+    glUniform1i(glGetUniformLocation(shaderProgram, "shadowMap"), 5);
+
     Core::DrawContext(sphereContext);
+}
+
+void Pearl::renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatrix)
+{
+    glUseProgram(depthShader);
+
+    glm::mat4 modelMatrix = getModelMatrix();
+    glUniformMatrix4fv(glGetUniformLocation(depthShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(depthShader, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+    Core::DrawContext(sphereContext);
+}
+
+glm::mat4 Pearl::getModelMatrix() const
+{
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
+    return modelMatrix;
 }
 
 void Pearl::shutdown()

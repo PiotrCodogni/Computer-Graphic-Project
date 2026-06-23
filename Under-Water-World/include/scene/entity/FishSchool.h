@@ -39,14 +39,22 @@ public:
 
     void render(const glm::mat4& view,
         const glm::mat4& projection,
-        const glm::vec3& cameraPos, 
-        const glm::vec3& fogColor, 
-        float fogDensity, 
-        const glm::vec3& lightPos);
+        const glm::vec3& cameraPos,
+        const glm::vec3& fogColor,
+        float fogDensity,
+        const glm::vec3& lightPos,
+        const glm::mat4& lightSpaceMatrix,
+        GLuint shadowMap,
+        bool useShadows
+    );
+
+    void renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatrix);
 
     void shutdown();
 
 private:
+    glm::mat4 getFishModelMatrix(const SchoolFishInstance& fish) const;
+
     std::vector<SchoolFishInstance> fishList;
 
     glm::vec3 schoolCenter;  // punkt centralny lawicy
