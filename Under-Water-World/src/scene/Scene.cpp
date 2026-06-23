@@ -430,6 +430,8 @@ bool Scene::init()
     std::vector<glm::vec3> spherePos;
     std::vector<glm::vec3> sphereNorm;
     std::vector<glm::vec2> sphereUV;
+    std::vector<glm::vec3> sphereTan;
+    std::vector<glm::vec3> sphereBitan;
     std::vector<unsigned int> sphereInd;
 
     int rings = 16;
@@ -446,9 +448,17 @@ bool Scene::init()
             float y = std::cos(phi);
             float z = std::sin(theta) * std::sin(phi);
 
-            spherePos.push_back(glm::vec3(x, y, z) * radius);
-            sphereNorm.push_back(glm::vec3(x, y, z));
+            glm::vec3 normal = glm::vec3(x, y, z);
+            spherePos.push_back(normal * radius);
+            sphereNorm.push_back(normal);
             sphereUV.push_back(glm::vec2((float)s / sectors, (float)r / rings));
+
+           glm::vec3 tangent = glm::vec3(-std::sin(theta), 0.0f, std::cos(theta));
+            if (std::abs(std::sin(phi)) < 0.001f)
+                tangent = glm::vec3(1.0f, 0.0f, 0.0f);
+
+            sphereTan.push_back(tangent);
+            sphereBitan.push_back(glm::cross(normal, tangent));
         }
     }
 
@@ -469,7 +479,8 @@ bool Scene::init()
         }
     }
 
-    rockContext.initFromVectors(spherePos, sphereNorm, sphereUV, sphereInd);
+    rockContext.initFromVectors(spherePos, sphereNorm, sphereUV, sphereInd, sphereTan, sphereBitan);
+
 
     // 3. Generate Cross-Quad Geometry (for algae)
     std::vector<glm::vec3> algaePos = {

@@ -3,10 +3,13 @@
 in vec3 fragNormal;
 in vec3 fragPos;
 in vec2 texCoord;
+in mat3 TBN;
 
 out vec4 FragColor;
 
 uniform sampler2D colorTexture;
+uniform sampler2D normalMap;
+uniform int isRock;
 uniform vec3 lightPos;
 uniform vec3 cameraPos;
 uniform float time;   // czas sceny do animacji odblaskow
@@ -103,18 +106,46 @@ float voronoiCaustics(vec2 pos, float t)
 
 void main()
 {
+   
+    vec3 norm;
+    if (isRock == 1)
+    {
+        vec3 normalFromMap = texture(normalMap, texCoord).rgb * 2.0 - 1.0;
+        // Wzmocnienie wypuklosci normalmapy (zwiekszenie wektorow x,y)
+        normalFromMap.xy *= 3.0; 
+        norm = normalize(TBN * normalFromMap);
+    }
+    else
+    {
+        norm = normalize(fragNormal);
+    }
+
     // --- Swiatlo otoczenia ---
-    float ambientStrength = 0.25;
-    vec3  ambient = ambientStrength * vec3(0.75, 0.88, 1.0);
+    // Zeby normalmapa (wypuklosci) byla widoczna takze w cieniu,
+    // ambient nie moze byc zupelnie staly. Uzalezniamy go delikatnie 
+    // od normalnej (kierunek do kamery + swiatlo z gory).
+    vec3  viewDir = normalize(cameraPos - fragPos);
+    float viewFactor = max(dot(norm, viewDir), 0.0);
+    float hemiFactor = 0.5 + 0.5 * norm.y;
+    
+    float ambientStrength = 0.45; 
+    vec3  ambient = ambientStrength * vec3(0.75, 0.88, 1.0) * (0.2 + 0.6 * viewFactor + 0.2 * hemiFactor);
 
     // --- Swiatlo kierunkowe (slonce z gory) ---
-    vec3  norm     = normalize(fragNormal);
     vec3  lightDir = normalize(lightPos - fragPos);
     float diff     = max(dot(norm, lightDir), 0.0);
     vec3  diffuse  = diff * vec3(1.0, 0.97, 0.9);
 
-    // --- Tekstura dna ---
-    vec3 texColor    = texture(colorTexture, texCoord).rgb;
+    //  Kolor materialu 
+    vec3 texColor;
+    if (isRock == 1)
+    {
+        texColor = vec3(0.55, 0.52, 0.50);
+    }
+    else
+    {
+        texColor = texture(colorTexture, texCoord).rgb;
+    }
     vec3 resultColor = (ambient + diffuse) * texColor;
 
     // --- Odblaski na dnie ---

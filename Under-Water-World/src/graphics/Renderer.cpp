@@ -21,7 +21,7 @@ bool Renderer::init(int width, int height)
 
 void Renderer::beginFrame()
 {
-    glClearColor(0.05f, 0.35f, 0.55f, 1.0f);
+    glClearColor(0.10f, 0.45f, 0.65f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -62,8 +62,8 @@ void Renderer::render(Scene& scene)
     glUniform3fv(glGetUniformLocation(seabedShader, "lightPos"), 1, glm::value_ptr(lightPos));
     glUniform1f(glGetUniformLocation(seabedShader, "time"), sceneTime);   // czas do animacji odblaskow
 
-    glm::vec3 fogColor = glm::vec3(0.05f, 0.35f, 0.55f);
-    float fogDensity = 0.025f;
+    glm::vec3 fogColor = glm::vec3(0.10f, 0.45f, 0.65f);
+    float fogDensity = 0.018f;
     glUniform3fv(glGetUniformLocation(seabedShader, "fogColor"), 1, glm::value_ptr(fogColor));
     glUniform1f(glGetUniformLocation(seabedShader, "fogDensity"), fogDensity);
 
@@ -112,8 +112,8 @@ void Renderer::render(Scene& scene)
     glUniform3fv(glGetUniformLocation(algaeShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
     glUniform1f(glGetUniformLocation(algaeShader, "time"), sceneTime);
 
-    glUniform3fv(glGetUniformLocation(algaeShader, "fogColor"), 1, glm::value_ptr(glm::vec3(0.05f, 0.35f, 0.55f)));
-    glUniform1f(glGetUniformLocation(algaeShader, "fogDensity"), 0.025f);
+    glUniform3fv(glGetUniformLocation(algaeShader, "fogColor"), 1, glm::value_ptr(fogColor));
+    glUniform1f(glGetUniformLocation(algaeShader, "fogDensity"), fogDensity);
 
     scene.getAlgaeTexture().bind(0);
     glUniform1i(glGetUniformLocation(algaeShader, "colorTexture"), 0);
