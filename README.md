@@ -1,4 +1,66 @@
-# Computer-Graphic-Project
+# Under Water World
+
+## Skład grupy
+- Ewelina Momot
+- Paweł Cieśliński
+- Piotr Codogni
+
+## Wybrane metody A/B
+Jako główne metody prezentowane w finalnej aplikacji wybraliśmy:
+- **A13 Environment cubemap reflections/refractions**: Wykorzystanie tekstury otoczenia (cubemap) do obliczania realistycznych odbić i załamań na powierzchni szklistego kryształu (Perły). Parametry te można płynnie modyfikować w panelu UI.
+- **B10 Depth fog**: Mieszanie koloru obiektów z kolorem środowiska (mgłą) zależnie od ich odległości od kamery, co symuluje naturalne zanikanie światła i widoczności w głębinach wodnych.
+
+### Zrealizowane metody dodatkowe
+Oprócz głównych metod zaimplementowano szereg innych, wzbogacających scenę:
+- **A01 Volumetric light shafts** - symulacja widocznych smug światła (God rays) w wodzie.
+- **A02 Caustics** - animowane wzory świetlne na dnie (kaustyka).
+- **A10 Procedural vegetation/rocks** - proceduralnie rozkładana roślinność (np. algi, koralowce) i skały.
+- **B05 Flocking/boids** - zaawansowane zachowanie ławicy ryb (pływanie po orbitach, tryb paniki i rozpraszania się).
+- **B07 Heightmap seabed** - proceduralnie generowana siatka nierówności dna morskiego (góry i doły).
+- **B09 OBJ model loading** - wczytywanie zewnętrznych modeli 3D (ryby, skały) z wykorzystaniem biblioteki Assimp.
+- **B11 UI panel** - interaktywny panel kontrolny (ImGui) do modyfikacji parametrów sceny w czasie rzeczywistym.
+- **B12 Transparency** - półprzezroczystość materiałów oraz wycinanie tła w roślinności morskiej (alpha discard i blending).
+
+## Metody obowiązkowe
+Projekt spełnia wszystkie wymagania obowiązkowe:
+1. **Normal mapping**: Dodawanie detali powierzchni (m.in. na dnie, skałach, koralowcach) za pomocą map normalnych.
+2. **PBR lighting**: Oświetlenie oparte na fizyce (współczynniki roughness i metallic) reagujące poprawnie na światło kierunkowe i ambient.
+3. **Quaternion camera control**: Płynne sterowanie kamerą i obrotami z użyciem kwaternionów (uniknięcie Gimbal Lock).
+4. **Shadow mapping**: Generowanie dynamicznych cieni rzucanych przez obiekty na dno z wykorzystaniem PCF (Percentage-Closer Filtering).
+5. **PTF (Parallel Transport Frame)**: Obliczanie i aktualizowanie orientacji modeli (np. ryb wzdłuż ich ścieżek).
+6. **Underwater skybox/cubemap**: Tekstura otoczenia dopasowana do środowiska podwodnego.
+
+---
+
+## Sterowanie
+### Klawiatura i Mysz
+- `W`, `A`, `S`, `D` - Poruszanie się rybki (przód, lewo, tył, prawo)
+- `Space` - Ruch w górę
+- `Left Shift` - Ruch w dół
+- `Q` - Reset widoku kamery 
+- `F` - **Tryb paniki ławicy ryb** (ryby dynamicznie rozpryskują się we wszystkich kierunkach, a ponowne wciśnięcie powoduje ich płynny powrót do ławicy)
+- `E` - **Interakcja z kryształem** (zatrzymuje/wznawia obrót kryształu; wymaga podpłynięcia blisko obiektu)
+- `Strzałki Lewo/Prawo` - Obrót kamery na boki 
+- `Strzałki Góra/Dół` - Obrót kamery w pionie
+- `ESC` - Zamknięcie aplikacji
+
+### Panel UI (ImGui)
+W lewym górnym rogu ekranu znajduje się panel **Scene Controls**, który pozwala na interakcję z systemami graficznymi na żywo:
+- **Show skybox**: Checkbox włączający/wyłączający renderowanie podwodnego skyboxa w tle.
+- **Enable shadow mapping**: Checkbox kontrolujący renderowanie cieni kierunkowych na dnie.
+- **F - tryb paniki lawicy**: Status informujący czy panika jest obecnie `WŁĄCZONA` czy `WYŁĄCZONA`.
+- **Crystal interaction**: Informacja o statusie kryształu (aktywny/nieaktywny) i podpowiedź czy jesteśmy wystarczająco blisko by użyć klawisza `E`.
+- **Pearl A13 Controls**: Sekcja do demonstracji metody A13 na krysztale. Posiada suwaki kontrolujące w czasie rzeczywistym parametry PBR: `Base color`, `F0`, `Fresnel power`, `Refraction ratio`, `Reflection strength`, `Refraction strength`. Znajduje się tam również przycisk `Reset pearl parameters` do przywrócenia domyślnych wartości.
+
+---
+
+## Zrzuty ekranu
+![Zrzut ekranu 1](screenshots/image-2.png)
+![Zrzut ekranu 2](screenshots/image-3.png)
+![Zrzut ekranu 3](screenshots/image.png)
+![Zrzut ekranu 4](screenshots/image-1.png)
+
+---
 
 ## Instalacja bibliotek
 
@@ -86,117 +148,42 @@ Computer-Graphic-Project/
 ├── Computer-Graphic-Project.sln
 ├── vcpkg.json
 ├── README.md
+├── screenshots/
 │
 └── Under-Water-World/
-    │
-    ├── src/
-    │   ├── main.cpp
-    │   │
+    ├── src/ i include/
     │   ├── core/
-    │   │   ├── Application.cpp
-    │   │   ├── Window.cpp
-    │   │   ├── Input.cpp
-    │   │   ├── Camera.cpp
-    │   │   └── Time.cpp
-    │   │
     │   ├── graphics/
-    │   │   ├── Shader.cpp
-    │   │   ├── Texture.cpp
-    │   │   ├── Model.cpp
-    │   │   ├── Renderer.cpp
-    │   │   └── Render_Utils.cpp
-    │   │
     │   └── scene/
-    │       ├── Scene.cpp
-    │       └── entity/
-    |           └──Fish1.cpp
-    │
-    ├── include/
-    │   ├── core/
-    │   │   ├── Application.h
-    │   │   ├── Window.h
-    │   │   ├── Input.h
-    │   │   ├── Camera.h
-    │   │   └── Time.h
-    │   │
-    │   ├── graphics/
-    │   │   ├── Shader.h
-    │   │   ├── Texture.h
-    │   │   ├── Model.h
-    │   │   ├── Renderer.h
-    │   │   └── Render_Utils.h
-    │   │
-    │   └── scene/
-    │       ├── Scene.h
-    │       └── entity/
-    |           └──Fish1.h
     │
     ├── shaders/
-    │   ├── basic.vert
-    │   ├── basic.frag
-    │   ├── fish.vert
-    │   └── fish.frag
-    │
     └── assets/
-        └── models/
-        |    └── fish1.glb
-        |        
-        |
-        ├─skybox/
-        |
-        └──texture/
-            └── fish1.png     
+        ├── models/
+        ├── skybox/
+        └── texture/
 ```
 
  ---
 
-## Opis modułów
+## Opis struktury i modułów
 
 ```text
-main.cpp
-Punkt startowy programu; tworzy obiekt Application, uruchamia inicjalizację, główną pętlę aplikacji i sprzątanie zasobów.
+Główne pliki projektu
+- vcpkg.json: Konfiguracja menedżera pakietów vcpkg z listą wymaganych bibliotek C++.
+- screenshots/: Folder przechowujący zrzuty ekranu wykorzystywane w pliku README.
+- assets/: Zasoby ładujące się do pamięci na start aplikacji. Zawierają modele 3D (models/), tekstury sześcianu podwodnego (skybox/) oraz obrazy PBR (texture/).
 
-core/Application
-Główna klasa aplikacji; zarządza oknem, czasem, inputem, sceną, rendererem oraz panelem ImGui.
+Programy cieniujące (shaders/)
+Katalog z programami GLSL uruchamianymi na GPU. Znajdują się tu shadery wyliczające oświetlenie PBR, proceduralne efekty (God Rays, mgła), zniekształcenia siatki (algi) i cieniowanie obiektów.
 
-core/Window
-Odpowiada za utworzenie okna GLFW, obsługę zamknięcia aplikacji, wymianę buforów i pobieranie zdarzeń systemowych.
+Zarządzanie aplikacją (core/)
+Odpowiada za punkt wejścia do aplikacji. Zawiera główną pętlę zdarzeń, zarządzanie oknem (Window), wejście klawiatury/myszy (Input), obliczanie czasu klatek (Time) oraz sterowanie kamerą (Camera).
 
-core/Input
-Odpowiada za sprawdzanie, które klawisze są aktualnie wciśnięte.
+System graficzny (graphics/)
+Logika komunikacji z OpenGL. Klasa Renderer zarządza głównym cyklem renderowania. Pozostałe klasy ładują programy cieniujące (Shader), wczytują modele przez Assimp (Model) oraz mapują tekstury na GPU (Texture, Cubemap).
 
-core/Camera
-Kamera podążająca za rybą; tworzy macierze view i projection używane podczas renderowania.
-
-core/Time
-Oblicza deltaTime, czyli czas pomiędzy klatkami, żeby ruch obiektów był niezależny od liczby FPS.
-
-graphics/Shader
-Wczytuje pliki shaderów, kompiluje vertex shader i fragment shader oraz tworzy program OpenGL.
-
-graphics/Texture
-Wczytuje tekstury z plików graficznych za pomocą stb_image i tworzy teksturę OpenGL.
-
-graphics/Model
-Wczytuje model 3D za pomocą Assimp i przekazuje jego dane do RenderContext.
-
-graphics/Render_Utils
-Tworzy i obsługuje bufory OpenGL, takie jak VAO, VBO i EBO, oraz rysuje geometrię modelu.
-
-graphics/Renderer
-Czyści ekran, pobiera kamerę ze sceny i wywołuje renderowanie obiektów sceny.
-
-scene/Scene
-Przechowuje obiekty znajdujące się w scenie, aktualizuje je i udostępnia je rendererowi.
-
-scene/entity/Fish1
-Reprezentuje rybę w scenie; przechowuje jej pozycję, obsługuje ruch, ładuje model i teksturę oraz renderuje obiekt.
-
-shaders
-Zawiera programy GLSL używane przez OpenGL do renderowania modeli.
-
-assets
-Zawiera pliki zasobów projektu, takie jak modele 3D i tekstury.
+Zarządzanie sceną (scene/)
+Miejsce przetrzymywania wszystkich obiektów w podwodnym świecie. Klasa Scene generuje (często proceduralnie) i aktualizuje świat. W podfolderze entity/ znajduje się logika konkretnych obiektów, np. ławicy ryb z trybem paniki (FishSchool) czy szklistego kryształu (Pearl).
 ```
 
  ---
