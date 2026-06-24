@@ -269,7 +269,7 @@ bool Scene::init()
         return false;
     }
 
-    crystal.setPosition(glm::vec3(-17.0f, -1.5f, -5.0f));
+    crystal.setPosition(glm::vec3(-9.5f, -2.5f, -14.5f));
     crystal.setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
     crystal.setScale(0.45f);
 
