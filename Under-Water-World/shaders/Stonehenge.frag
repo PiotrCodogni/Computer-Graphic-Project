@@ -21,31 +21,31 @@ float dist_ggx(vec3 n, vec3 h, float rgh) {
     float a2 = a * a;
     float n_dot_h = max(dot(n, h), 0.0);
     float n_dot_h2 = n_dot_h * n_dot_h;
-    
+
     float num = a2;
     float denom = (n_dot_h2 * (a2 - 1.0) + 1.0);
     denom = PI * denom * denom;
-    
+
     return num / denom;
 }
 
 float geom_schlick_ggx(float n_dot_v, float rgh) {
     float r = (rgh + 1.0);
     float k = (r * r) / 8.0;
-    
+
     float num = n_dot_v;
     float denom = n_dot_v * (1.0 - k) + k;
-    
+
     return num / denom;
 }
 
 float geom_smith(vec3 n, vec3 v, vec3 l, float rgh) {
     float n_dot_v = max(dot(n, v), 0.0);
     float n_dot_l = max(dot(n, l), 0.0);
-    
+
     float ggx2 = geom_schlick_ggx(n_dot_v, rgh);
     float ggx1 = geom_schlick_ggx(n_dot_l, rgh);
-    
+
     return ggx1 * ggx2;
 }
 
@@ -57,7 +57,7 @@ void main() {
     vec3 alb = pow(texture(colorTexture, texCoord).rgb, vec3(2.2));
     vec3 n = normalize(fragNormal);
     vec3 v = normalize(cameraPos - fragPos);
-    
+
     float met = 0.0;
     float rgh = 0.95;
 
@@ -69,7 +69,7 @@ void main() {
 
     float distL = length(lightPos - fragPos);
     float att = 1.0 / (distL * distL);
-    vec3 rad = vec3(300000.0) * att; 
+    vec3 rad = vec3(300000.0) * att;
 
     float ndf = dist_ggx(n, h, rgh);
     float g = geom_smith(n, v, l, rgh);
@@ -97,6 +97,6 @@ void main() {
 
     float dFog = length(cameraPos - fragPos);
     float fFac = clamp(exp(-dFog * fogDensity), 0.0, 1.0);
-    
+
     FragColor = vec4(mix(fogColor, resCol, fFac), 1.0);
-}
+}

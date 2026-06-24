@@ -3,11 +3,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 Renderer::Renderer()
 {
     viewportWidth = 1000;
     viewportHeight = 1000;
+    depthMapFBO = 0;
+    depthMap = 0;
+    shadowDepthShader = 0;
+    shadowDepthFishShader = 0;
+    shadowDepthAlgaeShader = 0;
 }
 
 bool Renderer::init(int width, int height)
@@ -16,6 +22,53 @@ bool Renderer::init(int width, int height)
     viewportHeight = height;
 
     glEnable(GL_DEPTH_TEST);
+
+    shadowDepthShader = shaderLoader.CreateProgram("shaders/shadow_depth.vert", "shaders/shadow_depth.frag");
+    if (shadowDepthShader == 0)
+    {
+        std::cout << "Failed to load shadow depth shader" << std::endl;
+        return false;
+    }
+
+    shadowDepthFishShader = shaderLoader.CreateProgram("shaders/shadow_depth_fish.vert", "shaders/shadow_depth.frag");
+    if (shadowDepthFishShader == 0)
+    {
+        std::cout << "Failed to load fish shadow depth shader" << std::endl;
+        return false;
+    }
+
+    shadowDepthAlgaeShader = shaderLoader.CreateProgram("shaders/shadow_depth_algae.vert", "shaders/shadow_depth_algae.frag");
+    if (shadowDepthAlgaeShader == 0)
+    {
+        std::cout << "Failed to load algae shadow depth shader" << std::endl;
+        return false;
+    }
+
+    glGenFramebuffers(1, &depthMapFBO);
+
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        std::cout << "Shadow depth framebuffer is incomplete" << std::endl;
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return false;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return true;
 }
 
@@ -38,10 +91,67 @@ void Renderer::render(Scene& scene)
     glm::mat4 projection = scene.getCamera().getProjectionMatrix(aspectRatio);
     glm::vec3 cameraPos = scene.getCamera().getPosition();
 
-  
-
     // Slonce nad powierzchnia wody
     glm::vec3 lightPos = glm::vec3(-200.19f, 290.01f, -24.38f);
+    glm::vec3 shadowCenter = glm::vec3(0.0f, -6.0f, -45.0f);
+    glm::mat4 lightProjection = glm::ortho(-180.0f, 180.0f, -180.0f, 180.0f, 1.0f, 700.0f);
+    glm::mat4 lightView = glm::lookAt(lightPos, shadowCenter, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+    if (scene.areShadowsEnabled() && depthMapFBO != 0 && shadowDepthShader != 0)
+    {
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        glUseProgram(shadowDepthShader);
+        glUniformMatrix4fv(glGetUniformLocation(shadowDepthShader, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+        for (const auto& rock : scene.getRocks())
+        {
+            glm::mat4 modelMatrix = glm::mat4(1.0f);
+            modelMatrix = glm::translate(modelMatrix, rock.position);
+            modelMatrix = glm::rotate(modelMatrix, glm::radians(rock.rotationY), glm::vec3(0.0f, 1.0f, 0.0f));
+            modelMatrix = glm::scale(modelMatrix, rock.scale);
+
+            glUniformMatrix4fv(glGetUniformLocation(shadowDepthShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+            Core::DrawContext(const_cast<Core::RenderContext&>(scene.getRockContext()));
+        }
+
+        scene.getStonehenge().renderDepth(shadowDepthShader, lightSpaceMatrix);
+        scene.getPearl().renderDepth(shadowDepthShader, lightSpaceMatrix);
+        scene.getFish().renderDepth(shadowDepthFishShader, lightSpaceMatrix);
+        scene.getSchoolOfFish().renderDepth(shadowDepthFishShader, lightSpaceMatrix);
+        scene.getVerrucosa().renderDepth(shadowDepthShader, lightSpaceMatrix);
+        scene.getFishSchool().renderDepth(shadowDepthFishShader, lightSpaceMatrix);
+        for (auto& c : scene.getCorals())
+        {
+            c.renderDepth(shadowDepthShader, lightSpaceMatrix);
+        }
+        for (auto& stray : scene.getStrayFish())
+        {
+            stray.renderDepth(shadowDepthFishShader, lightSpaceMatrix);
+        }
+        
+        glUseProgram(shadowDepthAlgaeShader);
+        glUniformMatrix4fv(glGetUniformLocation(shadowDepthAlgaeShader, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+        glUniform1f(glGetUniformLocation(shadowDepthAlgaeShader, "time"), scene.getSceneTime());
+        scene.getAlgaeTexture().bind(0);
+        glUniform1i(glGetUniformLocation(shadowDepthAlgaeShader, "alphaTexture"), 0);
+
+        for (const auto& algae : scene.getAlgaeList())
+        {
+            glm::mat4 modelMatrix = glm::mat4(1.0f);
+            modelMatrix = glm::translate(modelMatrix, algae.position);
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(algae.scale));
+
+            glUniformMatrix4fv(glGetUniformLocation(shadowDepthAlgaeShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+            Core::DrawContext(const_cast<Core::RenderContext&>(scene.getAlgaeContext()));
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, viewportWidth, viewportHeight);
+    }
 
     if (scene.isSkyboxVisible())
     {
@@ -60,6 +170,8 @@ void Renderer::render(Scene& scene)
     glUniformMatrix4fv(glGetUniformLocation(seabedShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniform3fv(glGetUniformLocation(seabedShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
     glUniform3fv(glGetUniformLocation(seabedShader, "lightPos"), 1, glm::value_ptr(lightPos));
+    glUniformMatrix4fv(glGetUniformLocation(seabedShader, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+    glUniform1i(glGetUniformLocation(seabedShader, "useShadows"), scene.areShadowsEnabled() ? 1 : 0);
     glUniform1f(glGetUniformLocation(seabedShader, "time"), sceneTime);   // czas do animacji odblaskow
 
     glm::vec3 fogColor = glm::vec3(0.10f, 0.45f, 0.65f);
@@ -72,6 +184,10 @@ void Renderer::render(Scene& scene)
 
     scene.getSeabedTexture().bind(0);
     glUniform1i(glGetUniformLocation(seabedShader, "colorTexture"), 0);
+
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glUniform1i(glGetUniformLocation(seabedShader, "shadowMap"), 5);
 
     // Ustawienie isRock na false dla dna morskiego
     glUniform1i(glGetUniformLocation(seabedShader, "isRock"), 0);
@@ -109,14 +225,20 @@ void Renderer::render(Scene& scene)
 
     glUniformMatrix4fv(glGetUniformLocation(algaeShader, "view"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(algaeShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(glGetUniformLocation(algaeShader, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
     glUniform3fv(glGetUniformLocation(algaeShader, "cameraPos"), 1, glm::value_ptr(cameraPos));
     glUniform1f(glGetUniformLocation(algaeShader, "time"), sceneTime);
+    glUniform1i(glGetUniformLocation(algaeShader, "useShadows"), scene.areShadowsEnabled() ? 1 : 0);
 
     glUniform3fv(glGetUniformLocation(algaeShader, "fogColor"), 1, glm::value_ptr(fogColor));
     glUniform1f(glGetUniformLocation(algaeShader, "fogDensity"), fogDensity);
 
     scene.getAlgaeTexture().bind(0);
     glUniform1i(glGetUniformLocation(algaeShader, "colorTexture"), 0);
+
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glUniform1i(glGetUniformLocation(algaeShader, "shadowMap"), 5);
 
     GLboolean isCullingEnabled = glIsEnabled(GL_CULL_FACE);
     if (isCullingEnabled) glDisable(GL_CULL_FACE);
@@ -141,16 +263,17 @@ void Renderer::render(Scene& scene)
         scene.getPearlEnvironmentMapId(),
         sceneTime,
         fogColor,
-        fogDensity
+        fogDensity,
+        lightSpaceMatrix,
+        depthMap,
+        scene.areShadowsEnabled()
     );
 
     // ------------------------------------------------------------------
     //  RYSOWANIE RYBKI GRACZA
     // ------------------------------------------------------------------
-    scene.getFish().render(view, projection, cameraPos, lightPos, fogColor, fogDensity);
-
-
-    scene.getSchoolOfFish().render(view, projection, cameraPos, lightPos, fogColor, fogDensity);
+    scene.getFish().render(view, projection, cameraPos, lightPos, fogColor, fogDensity, lightSpaceMatrix, depthMap, scene.areShadowsEnabled());
+    scene.getSchoolOfFish().render(view, projection, cameraPos, lightPos, fogColor, fogDensity, lightSpaceMatrix, depthMap, scene.areShadowsEnabled());
 
 
     // ------------------------------------------------------------------
@@ -161,12 +284,22 @@ void Renderer::render(Scene& scene)
     // ------------------------------------------------------------------
     // RYSOWANIE LAWICY RYB
     // ------------------------------------------------------------------
-    scene.getFishSchool().render(view, projection, cameraPos, fogColor, fogDensity, lightPos);
+    scene.getFishSchool().render(view, projection, cameraPos, fogColor, fogDensity, lightPos, lightSpaceMatrix, depthMap, scene.areShadowsEnabled());
+
+    for (auto& c : scene.getCorals())
+    {
+        c.render(view, projection, sceneTime, cameraPos, fogColor, fogDensity, lightPos);
+    }
+
+
+    scene.getVerrucosa().render(view, projection, sceneTime, cameraPos, fogColor, fogDensity, lightPos);
+
+    
     // ------------------------------------------------------------------
     // RYSOWANIE POJEDYNCZYCH PLYWAJACYCH GDZIE NIEGDZIE RYBEK
     // ------------------------------------------------------------------
     for (auto& stray : scene.getStrayFish()) {
-        stray.render(view, projection, cameraPos, fogColor, fogDensity, lightPos);
+        stray.render(view, projection, cameraPos, fogColor, fogDensity, lightPos, lightSpaceMatrix, depthMap, scene.areShadowsEnabled());
     }
     
     // RYSOWANIE POWIERZCHNI WODY (od spodu, z normal mappingiem)
@@ -245,5 +378,33 @@ void Renderer::endFrame()
 
 void Renderer::shutdown()
 {
-}
+    if (shadowDepthShader != 0)
+    {
+        shaderLoader.DeleteProgram(shadowDepthShader);
+        shadowDepthShader = 0;
+    }
 
+    if (shadowDepthFishShader != 0)
+    {
+        shaderLoader.DeleteProgram(shadowDepthFishShader);
+        shadowDepthFishShader = 0;
+    }
+
+    if (shadowDepthAlgaeShader != 0)
+    {
+        shaderLoader.DeleteProgram(shadowDepthAlgaeShader);
+        shadowDepthAlgaeShader = 0;
+    }
+
+    if (depthMap != 0)
+    {
+        glDeleteTextures(1, &depthMap);
+        depthMap = 0;
+    }
+
+    if (depthMapFBO != 0)
+    {
+        glDeleteFramebuffers(1, &depthMapFBO);
+        depthMapFBO = 0;
+    }
+}

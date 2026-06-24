@@ -38,8 +38,8 @@ static float rockNoise(float x, float y) {
     float n01 = rockHash(ix, iy + 1);
     float n11 = rockHash(ix + 1, iy + 1);
 
-    return (n00 * (1.0f - u) + n10 * u) * (1.0f - v) + 
-           (n01 * (1.0f - u) + n11 * u) * v;
+    return (n00 * (1.0f - u) + n10 * u) * (1.0f - v) +
+        (n01 * (1.0f - u) + n11 * u) * v;
 }
 
 static GLuint generateRockNormalMap(int w, int h)
@@ -52,11 +52,11 @@ static GLuint generateRockNormalMap(int w, int h)
         {
             float fx = (float)x / (float)w * 25.0f;
             float fy = (float)y / (float)h * 25.0f;
-            
+
             float h_val = 0.0f;
             float amp = 1.0f;
             // 6 oktaw FBM z uzyciem turbulencji (abs) dla ostrych, spękanych krawędzi
-            for(int i = 0; i < 6; i++) {
+            for (int i = 0; i < 6; i++) {
                 h_val += amp * std::abs(rockNoise(fx, fy));
                 fx *= 2.1f;
                 fy *= 2.1f;
@@ -83,9 +83,9 @@ static GLuint generateRockNormalMap(int w, int h)
             glm::vec3 n = glm::normalize(glm::vec3(-dx, 1.0f, -dz));
 
             int idx = (y * w + x) * 3;
-            px[idx+0] = (unsigned char)((n.x * 0.5f + 0.5f) * 255.0f);
-            px[idx+1] = (unsigned char)((n.y * 0.5f + 0.5f) * 255.0f);
-            px[idx+2] = (unsigned char)((n.z * 0.5f + 0.5f) * 255.0f);
+            px[idx + 0] = (unsigned char)((n.x * 0.5f + 0.5f) * 255.0f);
+            px[idx + 1] = (unsigned char)((n.y * 0.5f + 0.5f) * 255.0f);
+            px[idx + 2] = (unsigned char)((n.z * 0.5f + 0.5f) * 255.0f);
         }
     }
 
@@ -103,14 +103,15 @@ static GLuint generateRockNormalMap(int w, int h)
 
 Scene::Scene()
 {
-    sceneTime         = 0.0f;
-    seabedShader      = 0;
-    algaeShader       = 0;
-    godRaysShader     = 0;
-    waterSurfaceShader= 0;
-    rockNormalMapId   = 0;
-    waterNormalMapId  = 0;
-    showSkybox        = false;
+    sceneTime = 0.0f;
+    seabedShader = 0;
+    algaeShader = 0;
+    godRaysShader = 0;
+    waterSurfaceShader = 0;
+    rockNormalMapId = 0;
+    waterNormalMapId = 0;
+    showSkybox = false;
+    showShadows = true;
 }
 
 float getSeabedHeight(float x, float z)
@@ -147,6 +148,69 @@ bool Scene::init()
         return false;
     }
 
+    struct CoralSpawn {
+        float x;
+        float z;
+        float yOffset;
+    };
+    CoralSpawn coralSpawns[] = {
+        { -8.22f,  -56.26f,  0.0f },
+        { -53.77f, -50.20f,  2.4f },
+        { -35.21f, -23.90f,  0.0f },
+        { -17.03f, -81.90f,  0.0f },
+        { 53.33f,  -56.07f,  0.0f },
+        { -56.32f, -82.82f,   0.4f },
+        { 18.25f, -74.91f, 0.0f},
+        {34.82f, -71.58f, 0.0f},
+        { 41.36f, -22.99f, 0.0f},
+        { 21.49f, -10.49, 0.0f},
+        {-27.20f, 37.70, 0.0f},
+        {-7.80f, 11.42f, 0.01f}
+    };
+
+    for (const auto& spawn : coralSpawns)
+    {
+        Coral c;
+        if (!c.init(
+            "assets/models/Coral/scene.gltf",
+            "shaders/coral.vert",
+            "shaders/coral.frag"
+        ))
+        {
+            std::cout << "Failed to init coral" << std::endl;
+            return false;
+        }
+
+
+        float y = getSeabedHeight(spawn.x, spawn.z);
+        c.setPosition(glm::vec3(spawn.x, y + spawn.yOffset, spawn.z));
+
+        c.setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
+
+        float scl = 0.8f + static_cast<float>(std::rand()) / (static_cast<float>(RAND_MAX / 0.6f));
+        c.setScale(scl);
+
+        c.setPivotOffset(glm::vec3(0.0f, 0.0f, 0.0f));
+
+        corals.push_back(std::move(c));
+    }
+
+
+    if (!verrucosa.init(
+        "assets/models/verrucosa/scene.gltf",
+        "shaders/coral.vert",
+        "shaders/coral.frag"
+    ))
+    {
+        std::cout << "Failed to load Verrucosa" << std::endl;
+        return false;
+    }
+
+    verrucosa.setPosition(glm::vec3(-9.95f, 0.0f, -37.74f));
+    verrucosa.setRotation(glm::vec3(-189.0f, 0.0f, 0.0f));
+    verrucosa.setScale(0.5f);
+
+    
     if (!pearlEnvironmentMap.loadFromFiles({
     "assets/environment/pearl/right.png",
     "assets/environment/pearl/left.png",
@@ -167,7 +231,7 @@ bool Scene::init()
         "assets/skybox/bottom.png",
         "assets/skybox/front.png",
         "assets/skybox/back.png"
-    }))
+        }))
     {
         std::cout << "Failed to load underwater skybox" << std::endl;
         return false;
@@ -195,9 +259,6 @@ bool Scene::init()
     stonehenge.setScale(0.1f);
 
     stonehenge.setPivotOffset(glm::vec3(0.0f, 0.0f, 0.0f));
-
-
-
 
     // Load shaders
     seabedShader = shaderLoader.CreateProgram("shaders/seabed.vert", "shaders/seabed.frag");
@@ -235,11 +296,11 @@ bool Scene::init()
     }
 
     // Generowanie proceduralnych normalmap dla kamienia
-    rockNormalMapId   = generateRockNormalMap(256, 256);
+    rockNormalMapId = generateRockNormalMap(256, 256);
     std::cout << "Generated procedural normal map for rock" << std::endl;
 
     //normalmapa dla powierchni wody (animowane fale)
-     {
+    {
         const int W = 512, H = 512;
         std::vector<unsigned char> px(W * H * 3);
         for (int y = 0; y < H; y++)
@@ -252,19 +313,19 @@ bool Scene::init()
 
                 // Aby tekstura wody byla seamless na calej powierzchni
                 float bx = std::sin(fx * 1.0f + fy * 1.0f) * 0.55f
-                         + std::sin(fx * 2.0f - fy * 2.0f) * 0.30f
-                         + std::sin(fx * 1.0f + fy * 3.0f) * 0.15f;
+                    + std::sin(fx * 2.0f - fy * 2.0f) * 0.30f
+                    + std::sin(fx * 1.0f + fy * 3.0f) * 0.15f;
                 float bz = std::cos(fx * 1.0f + fy * 1.0f) * 0.55f
-                         + std::cos(fx * 2.0f - fy * 2.0f) * 0.30f
-                         + std::cos(fx * 3.0f + fy * 1.0f) * 0.15f;
+                    + std::cos(fx * 2.0f - fy * 2.0f) * 0.30f
+                    + std::cos(fx * 3.0f + fy * 1.0f) * 0.15f;
 
-                
+
                 glm::vec3 n = glm::normalize(glm::vec3(-bx, 1.5f, -bz));
 
                 int idx = (y * W + x) * 3;
-                px[idx+0] = (unsigned char)((n.x * 0.5f + 0.5f) * 255.0f);
-                px[idx+1] = (unsigned char)((n.y * 0.5f + 0.5f) * 255.0f);
-                px[idx+2] = (unsigned char)((n.z * 0.5f + 0.5f) * 255.0f);
+                px[idx + 0] = (unsigned char)((n.x * 0.5f + 0.5f) * 255.0f);
+                px[idx + 1] = (unsigned char)((n.y * 0.5f + 0.5f) * 255.0f);
+                px[idx + 2] = (unsigned char)((n.z * 0.5f + 0.5f) * 255.0f);
             }
         }
         glGenTextures(1, &waterNormalMapId);
@@ -286,9 +347,9 @@ bool Scene::init()
         return false;
     }
 
-     {
-        const float WSZ = 6000.0f; 
-        const float H   = 450.0f; 
+    {
+        const float WSZ = 6000.0f;
+        const float H = 450.0f;
         const int   SEG = 30;
         float step = WSZ / SEG;
         float half = WSZ / 2.0f;
@@ -304,10 +365,10 @@ bool Scene::init()
                 float x = -half + i * step;
                 float z = -half + j * step;
                 wpos.push_back(glm::vec3(x, H, z));
-                wnorm.push_back(glm::vec3(0.0f, -1.0f, 0.0f)); 
-                wtan.push_back(glm::vec3(1.0f, 0.0f, 0.0f));  
-                wbitan.push_back(glm::vec3(0.0f, 0.0f, 1.0f)); 
-                
+                wnorm.push_back(glm::vec3(0.0f, -1.0f, 0.0f));
+                wtan.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+                wbitan.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+
                 wuv.push_back(glm::vec2(x / WSZ * 1.0f, z / WSZ * 1.0f));
             }
         }
@@ -339,25 +400,25 @@ bool Scene::init()
             glBufferData(GL_ARRAY_BUFFER, bytes, data, GL_STATIC_DRAW);
             glEnableVertexAttribArray(loc);
             glVertexAttribPointer(loc, comp, GL_FLOAT, GL_FALSE, 0, nullptr);
-        };
+            };
 
-        upload(vboPos,   0, wpos.data(),   wpos.size()   * sizeof(glm::vec3), 3);
-        upload(vboNorm,  1, wnorm.data(),  wnorm.size()  * sizeof(glm::vec3), 3);
-        upload(vboUV,    2, wuv.data(),    wuv.size()    * sizeof(glm::vec2), 2);
-        upload(vboTan,   3, wtan.data(),   wtan.size()   * sizeof(glm::vec3), 3);
+        upload(vboPos, 0, wpos.data(), wpos.size() * sizeof(glm::vec3), 3);
+        upload(vboNorm, 1, wnorm.data(), wnorm.size() * sizeof(glm::vec3), 3);
+        upload(vboUV, 2, wuv.data(), wuv.size() * sizeof(glm::vec2), 2);
+        upload(vboTan, 3, wtan.data(), wtan.size() * sizeof(glm::vec3), 3);
         upload(vboBitan, 4, wbitan.data(), wbitan.size() * sizeof(glm::vec3), 3);
 
         glGenBuffers(1, &ebo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, wind.size() * sizeof(unsigned int), wind.data(), GL_STATIC_DRAW);
 
-        waterSurfaceContext.vertexArray       = vao;
-        waterSurfaceContext.vertexBuffer      = vboPos;
+        waterSurfaceContext.vertexArray = vao;
+        waterSurfaceContext.vertexBuffer = vboPos;
         waterSurfaceContext.vertexIndexBuffer = ebo;
-        waterSurfaceContext.size              = (int)wind.size();
+        waterSurfaceContext.size = (int)wind.size();
 
         glBindVertexArray(0);
-        
+
     }
 
     // 1. Generate Seabed Geometry
@@ -379,7 +440,7 @@ bool Scene::init()
             float z = -halfSize + j * step;
             float y = getSeabedHeight(x, z);
             positions.push_back(glm::vec3(x, y, z));
-            
+
             // Texture tiling
             uvs.push_back(glm::vec2(x * 0.1f, z * 0.1f));
         }
@@ -392,13 +453,13 @@ bool Scene::init()
         {
             float x = -halfSize + i * step;
             float z = -halfSize + j * step;
-            
+
             float delta = 0.1f;
             float y_l = getSeabedHeight(x - delta, z);
             float y_r = getSeabedHeight(x + delta, z);
             float y_d = getSeabedHeight(x, z - delta);
             float y_u = getSeabedHeight(x, z + delta);
-            
+
             glm::vec3 tangentX(2.0f * delta, y_r - y_l, 0.0f);
             glm::vec3 tangentZ(0.0f, y_u - y_d, 2.0f * delta);
             glm::vec3 normal = glm::normalize(glm::cross(tangentZ, tangentX));
@@ -514,8 +575,8 @@ bool Scene::init()
     //    Wierzcholki w przestrzeni ekranu (-1..1)
     std::vector<glm::vec3> quadPos = {
         glm::vec3(-1.0f, -1.0f, 0.0f),
-        glm::vec3( 1.0f, -1.0f, 0.0f),
-        glm::vec3( 1.0f,  1.0f, 0.0f),
+        glm::vec3(1.0f, -1.0f, 0.0f),
+        glm::vec3(1.0f,  1.0f, 0.0f),
         glm::vec3(-1.0f,  1.0f, 0.0f)
     };
     std::vector<glm::vec3> quadNorm = {
@@ -537,16 +598,16 @@ bool Scene::init()
         float z = -150.0f + static_cast<float>(std::rand()) / (static_cast<float>(RAND_MAX / 300.0f));
         float y = getSeabedHeight(x, z);
 
-        if (std::sqrt(x*x + z*z) < 10.0f) continue;
+        if (std::sqrt(x * x + z * z) < 10.0f) continue;
 
         RockInstance rock;
         rock.position = glm::vec3(x, y - 0.2f, z);
-        
+
         float scaleX = 1.0f + static_cast<float>(std::rand()) / (static_cast<float>(RAND_MAX / 3.0f));
         float scaleY = 0.5f + static_cast<float>(std::rand()) / (static_cast<float>(RAND_MAX / 2.0f));
         float scaleZ = 1.0f + static_cast<float>(std::rand()) / (static_cast<float>(RAND_MAX / 3.0f));
         rock.scale = glm::vec3(scaleX, scaleY, scaleZ);
-        
+
         rock.rotationY = static_cast<float>(std::rand()) / (static_cast<float>(RAND_MAX / 360.0f));
 
         rocks.push_back(rock);
@@ -559,7 +620,7 @@ bool Scene::init()
         float z = -150.0f + static_cast<float>(std::rand()) / (static_cast<float>(RAND_MAX / 300.0f));
         float y = getSeabedHeight(x, z);
 
-        if (std::sqrt(x*x + z*z) < 5.0f) continue;
+        if (std::sqrt(x * x + z * z) < 5.0f) continue;
 
         AlgaeInstance algae;
         algae.position = glm::vec3(x, y, z);
@@ -587,12 +648,12 @@ bool Scene::init()
     };
     StraySpawn straySpawns[] = {
         { 1, glm::vec3(-25.0f, -1.0f, -10.0f) },
-        { 2, glm::vec3( 15.0f,  0.0f, -35.0f) },
+        { 2, glm::vec3(15.0f,  0.0f, -35.0f) },
         { 1, glm::vec3(-10.0f, -3.0f,  20.0f) },
-        { 2, glm::vec3( 30.0f, -2.0f,   5.0f) },
+        { 2, glm::vec3(30.0f, -2.0f,   5.0f) },
         { 1, glm::vec3(-35.0f,  1.0f, -25.0f) },
-        { 2, glm::vec3(  5.0f, -4.0f,  30.0f) },
-        { 1, glm::vec3( 40.0f,  0.0f, -15.0f) },
+        { 2, glm::vec3(5.0f, -4.0f,  30.0f) },
+        { 1, glm::vec3(40.0f,  0.0f, -15.0f) },
         { 1, glm::vec3(-20.0f, -2.0f, -40.0f) },
     };
 
@@ -623,11 +684,17 @@ void Scene::update(float deltaTime, const Input& input)
     glm::vec3 camForward = camera.getForwardDirection();
     fish.update(deltaTime, input, camForward);
     fishSchool.update(deltaTime);
+    verrucosa.update(deltaTime, input);
     for (auto& stray : strayFish)
         stray.update(deltaTime);
+
     camera.update(deltaTime, input);
     school.update(fish.getPosition(), deltaTime);
     camera.followTarget(fish.getPosition());
+
+    for (auto& c : corals)
+        c.update(deltaTime, input);
+
 }
 
 void Scene::shutdown()
@@ -636,13 +703,21 @@ void Scene::shutdown()
     fishSchool.shutdown();
     for (auto& stray : strayFish)
         stray.shutdown();
-	stonehenge.shutdown();
+    stonehenge.shutdown();
+
+
+    for (auto& c : corals)
+        c.shutdown();
+
+
+
     seabedTexture.shutdown();
     algaeTexture.shutdown();
     pearl.shutdown();
     pearlEnvironmentMap.shutdown();
     skybox.shutdown();
-    
+    verrucosa.shutdown();
+
 
     if (seabedShader != 0)
     {
@@ -660,7 +735,7 @@ void Scene::shutdown()
         godRaysShader = 0;
     }
     // Usuniecie proceduralnych normalmap
-    if (rockNormalMapId  != 0) { glDeleteTextures(1, &rockNormalMapId);  rockNormalMapId  = 0; }
+    if (rockNormalMapId != 0) { glDeleteTextures(1, &rockNormalMapId);  rockNormalMapId = 0; }
     if (waterNormalMapId != 0) { glDeleteTextures(1, &waterNormalMapId); waterNormalMapId = 0; }
     if (waterSurfaceShader != 0) { shaderLoader.DeleteProgram(waterSurfaceShader); waterSurfaceShader = 0; }
 }

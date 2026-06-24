@@ -8,6 +8,7 @@
 #include "scene/entity/FishSchool.h"
 #include "scene/entity/SchoolOfFish.h"
 #include "scene/entity/Stonehenge.h"
+#include "scene/entity/Coral.h"
 #include "graphics/Render_Utils.h"
 #include "graphics/Texture.h"
 #include "graphics/Shader.h"
@@ -43,10 +44,15 @@ public:
     SchoolOfFish& getSchoolOfFish() { return school; }
     Camera& getCamera();
     Stonehenge& getStonehenge();
+    Coral& getVerrucosa() { return verrucosa; }
+    std::vector<Coral>& getCorals() { return corals; }
+
     Pearl& getPearl();
     Skybox& getSkybox() { return skybox; }
     bool isSkyboxVisible() const { return showSkybox; }
     bool& getShowSkyboxRef() { return showSkybox; }
+    bool areShadowsEnabled() const { return showShadows; }
+    bool& getShowShadowsRef() { return showShadows; }
 
     const Core::RenderContext& getSeabedContext() const { return seabedContext; }
     const Core::RenderContext& getRockContext() const { return rockContext; }
@@ -81,7 +87,10 @@ private:
     Stonehenge stonehenge;
     Cubemap pearlEnvironmentMap;
     Pearl pearl;
+
     Skybox skybox;
+    std::vector<Coral> corals;
+    Coral verrucosa;\
 
     Core::RenderContext seabedContext;
     Core::RenderContext rockContext;
@@ -106,4 +115,5 @@ private:
 
     float sceneTime;
     bool showSkybox;
+    bool showShadows;
 };

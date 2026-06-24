@@ -1,11 +1,11 @@
 #include <GL/glew.h>
-#include "scene/entity/Stonehenge.h"
+#include "scene/entity/Coral.h"
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-Stonehenge::Stonehenge()
+Coral::Coral()
 {
     position = glm::vec3(0.0f, 0.0f, 0.0f);
     scale = 1.0f;
@@ -14,7 +14,7 @@ Stonehenge::Stonehenge()
     shaderProgram = 0;
 }
 
-bool Stonehenge::init(
+bool Coral::init(
     const char* modelPath,
     const char* vertexShaderPath,
     const char* fragmentShaderPath
@@ -27,7 +27,7 @@ bool Stonehenge::init(
 
     if (shaderProgram == 0)
     {
-        std::cout << "Failed to create Stonehenge shader program" << std::endl;
+        std::cout << "Failed to create Coral shader program" << std::endl;
         return false;
     }
 
@@ -39,11 +39,11 @@ bool Stonehenge::init(
     return true;
 }
 
-void Stonehenge::update(float deltaTime, const Input& input)
+void Coral::update(float deltaTime, const Input& input)
 {
 }
 
-void Stonehenge::render(
+void Coral::render(
     const glm::mat4& view,
     const glm::mat4& projection,
     float time,
@@ -71,7 +71,7 @@ void Stonehenge::render(
     model.draw();
 }
 
-void Stonehenge::renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatrix)
+void Coral::renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatrix)
 {
     glUseProgram(depthShader);
 
@@ -82,7 +82,7 @@ void Stonehenge::renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatr
     model.drawDepth();
 }
 
-glm::mat4 Stonehenge::getModelMatrix() const
+glm::mat4 Coral::getModelMatrix() const
 {
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, position);
@@ -94,7 +94,7 @@ glm::mat4 Stonehenge::getModelMatrix() const
     return modelMatrix;
 }
 
-void Stonehenge::shutdown()
+void Coral::shutdown()
 {
     if (shaderProgram != 0)
     {
@@ -103,27 +103,27 @@ void Stonehenge::shutdown()
     }
 }
 
-glm::vec3 Stonehenge::getPosition() const
+glm::vec3 Coral::getPosition() const
 {
     return position;
 }
 
-void Stonehenge::setPosition(glm::vec3 newPosition)
+void Coral::setPosition(glm::vec3 newPosition)
 {
     position = newPosition;
 }
 
-void Stonehenge::setScale(float newScale)
+void Coral::setScale(float newScale)
 {
     scale = newScale;
 }
 
-void Stonehenge::setRotation(glm::vec3 newRotation)
+void Coral::setRotation(glm::vec3 newRotation)
 {
     rotation = newRotation;
 }
 
-void Stonehenge::setPivotOffset(glm::vec3 offset)
+void Coral::setPivotOffset(glm::vec3 offset)
 {
     pivotOffset = offset;
 }

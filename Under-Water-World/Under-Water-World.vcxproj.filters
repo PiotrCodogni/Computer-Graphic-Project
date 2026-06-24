@@ -144,6 +144,21 @@
     <None Include="shaders\seabed.vert">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="shaders\shadow_depth_algae.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\shadow_depth_algae.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\shadow_depth.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\shadow_depth_fish.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\shadow_depth.vert">
+      <Filter>Shader Files</Filter>
+    </None>
     <None Include="shaders\Stonehenge.frag">
       <Filter>Shader Files</Filter>
     </None>

@@ -13,7 +13,7 @@ bool SchoolOfFish::init(const char* mPath, const char* tPath, const char* vShade
     if (!model.loadFromFile(mPath)) return false;
 
     // ------------------------------------------------------------------
-    // GENEROWANIE ZAMKNIÊTEJ PÊTLI SPLAJNU
+    // GENEROWANIE ZAMKNIï¿½TEJ Pï¿½TLI SPLAJNU
     // ------------------------------------------------------------------
     std::vector<glm::vec3> controlPoints = {
         glm::vec3(-36.33f, -0.36f, -55.9f),
@@ -70,7 +70,7 @@ bool SchoolOfFish::init(const char* mPath, const char* tPath, const char* vShade
 
     fishProgress.resize(5, 0.0f); // 5 rybek
     for (int i = 0; i < 5; ++i) {
-        fishProgress[i] = (float)frames.size() - (i * 60.0f); // Pocz¹tkowy odstêp
+        fishProgress[i] = (float)frames.size() - (i * 60.0f); // Poczï¿½tkowy odstï¿½p
     }
 
     for (size_t i = 1; i < M; ++i) {
@@ -101,52 +101,89 @@ void SchoolOfFish::update(glm::vec3 targetPos, float dt) {
     }
 }
 
-void SchoolOfFish::render(const glm::mat4& view, const glm::mat4& proj, const glm::vec3& camPos, const glm::vec3& lightPos, const glm::vec3& fogColor, float fogDensity) {
+void SchoolOfFish::render(
+    const glm::mat4& view,
+    const glm::mat4& proj,
+    const glm::vec3& camPos,
+    const glm::vec3& lightPos,
+    const glm::vec3& fogColor,
+    float fogDensity,
+    const glm::mat4& lightSpaceMatrix,
+    GLuint shadowMap,
+    bool useShadows
+) {
     if (frames.size() < 2) return;
 
     glUseProgram(shaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(proj));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
     glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, glm::value_ptr(camPos));
     glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
     glUniform3fv(glGetUniformLocation(shaderProgram, "fogColor"), 1, glm::value_ptr(fogColor));
     glUniform1f(glGetUniformLocation(shaderProgram, "fogDensity"), fogDensity);
+    glUniform1i(glGetUniformLocation(shaderProgram, "useShadows"), useShadows ? 1 : 0);
 
     texture.bind(0);
     glUniform1i(glGetUniformLocation(shaderProgram, "colorTexture"), 0);
 
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, shadowMap);
+    glUniform1i(glGetUniformLocation(shaderProgram, "shadowMap"), 5);
+
     for (size_t i = 0; i < fishProgress.size(); ++i) {
         int idx = (int)fishProgress[i] % (int)frames.size();
-        PTFrame& f = frames[idx];
+        const PTFrame& f = frames[idx];
+        glm::mat4 m_mat = getFishModelMatrix(f);
 
-        // Wyliczenie osi Parallel Transport
-        glm::vec3 T = f.T;
-        glm::vec3 w_up = glm::vec3(0.0f, 1.0f, 0.0f);
-        if (std::abs(glm::dot(T, w_up)) > 0.99f) w_up = glm::vec3(0.0f, 0.0f, 1.0f);
-
-        glm::vec3 B = glm::normalize(glm::cross(w_up, T));
-        glm::vec3 N = glm::normalize(glm::cross(T, B));
-
-        // TWORZENIE MACIERZY:
-        // 1. Translacja do punktu f.P
-        glm::mat4 m_mat = glm::translate(glm::mat4(1.0f), f.P);
-
-        // 2. Rotacja (Orientacja wzd³u¿ PTF)
-        glm::mat4 rotMat(1.0f);
-        rotMat[0] = glm::vec4(B, 0.0f);
-        rotMat[1] = glm::vec4(N, 0.0f);
-        rotMat[2] = glm::vec4(T, 0.0f);
-
-        // Finalna macierz = (Pozycja * Rotacja) * Skala
-        m_mat = m_mat * rotMat;
-        m_mat = glm::rotate(m_mat, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        m_mat = glm::rotate(m_mat, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        m_mat = m_mat * glm::scale(glm::mat4(1.0f), glm::vec3(15.0f));
-
+        glUniform1f(glGetUniformLocation(shaderProgram, "time"), animationTime + static_cast<float>(i) * 0.35f);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(m_mat));
         model.draw();
     }
 }
+
+void SchoolOfFish::renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMatrix)
+{
+    if (frames.size() < 2) return;
+
+    glUseProgram(depthShader);
+    glUniformMatrix4fv(glGetUniformLocation(depthShader, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+    for (size_t i = 0; i < fishProgress.size(); ++i) {
+        int idx = (int)fishProgress[i] % (int)frames.size();
+        const PTFrame& f = frames[idx];
+        glm::mat4 m_mat = getFishModelMatrix(f);
+
+        glUniform1f(glGetUniformLocation(depthShader, "time"), animationTime + static_cast<float>(i) * 0.35f);
+        glUniformMatrix4fv(glGetUniformLocation(depthShader, "model"), 1, GL_FALSE, glm::value_ptr(m_mat));
+        model.drawDepth();
+    }
+}
+
+glm::mat4 SchoolOfFish::getFishModelMatrix(const PTFrame& frame) const
+{
+    glm::vec3 T = frame.T;
+    glm::vec3 w_up = glm::vec3(0.0f, 1.0f, 0.0f);
+    if (std::abs(glm::dot(T, w_up)) > 0.99f) w_up = glm::vec3(0.0f, 0.0f, 1.0f);
+
+    glm::vec3 B = glm::normalize(glm::cross(w_up, T));
+    glm::vec3 N = glm::normalize(glm::cross(T, B));
+
+    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), frame.P);
+
+    glm::mat4 rotMat(1.0f);
+    rotMat[0] = glm::vec4(B, 0.0f);
+    rotMat[1] = glm::vec4(N, 0.0f);
+    rotMat[2] = glm::vec4(T, 0.0f);
+
+    modelMatrix = modelMatrix * rotMat;
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    modelMatrix = modelMatrix * glm::scale(glm::mat4(1.0f), glm::vec3(15.0f));
+
+    return modelMatrix;
+}
+
 void SchoolOfFish::shutdown() {
     texture.shutdown();
     if (shaderProgram != 0) {
