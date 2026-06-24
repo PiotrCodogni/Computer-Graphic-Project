@@ -116,4 +116,5 @@ private:
     float sceneTime;
     bool showSkybox;
     bool showShadows;
+    bool fKeyPrevious;  // do wykrywania wcisniecia klawisza F (toggle tryb plywania rybek)
 };

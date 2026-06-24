@@ -10,6 +10,8 @@ FishSchool::FishSchool() {
     schoolCenter = glm::vec3(0.0f);
     schoolTime = 0.0f;
     shaderProgram = 0;
+    panicMode = false;
+    panicBlend = 0.0f;
 }
 
 bool FishSchool::init(const char* modPath, const char* texPath, const char* vShader, const char* fShader, int fCount, glm::vec3 centPos) {
@@ -47,6 +49,15 @@ bool FishSchool::init(const char* modPath, const char* texPath, const char* vSha
         rFlt = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
         f.scale = 25.0f + rFlt * 20.0f;
 
+        f.baseOrbitSpeed = f.orbitSpeed;
+        f.baseOrbitRadius = f.orbitRadius;
+
+        // Losowy kierunek ucieczki dla kazdej ryby
+        float escAngle = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * glm::two_pi<float>();
+        float escY = -0.3f + static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 0.6f;
+        f.escapeDir = glm::normalize(glm::vec3(std::cos(escAngle), escY, std::sin(escAngle)));
+        f.escapeOffset = glm::vec3(0.0f);
+
         f.position = schoolCenter + glm::vec3(f.orbitRadius * std::cos(f.orbitAngle), f.heightOffset, f.orbitRadius * std::sin(f.orbitAngle));
         f.heading = 0.0f;
 
@@ -58,28 +69,80 @@ bool FishSchool::init(const char* modPath, const char* texPath, const char* vSha
 void FishSchool::update(float dt) {
     schoolTime += dt;
 
+    // Plynna interpolacja miedzy trybami (0 = spokojnie, 1 = panika)
+    float targetBlend = panicMode ? 1.0f : 0.0f;
+    float blendSpeed = panicMode ? 4.0f : 2.0f;
+    if (panicBlend < targetBlend)
+        panicBlend = std::min(panicBlend + blendSpeed * dt, 1.0f);
+    else
+        panicBlend = std::max(panicBlend - blendSpeed * dt, 0.0f);
+    // Panika: tylko zmiana predkosci i ucieczka offsetem 
+    float speedMul = 1.0f + panicBlend * 1.5f;
+
     glm::vec3 dCent = schoolCenter;
     dCent.x += std::sin(schoolTime * 0.05f) * 3.0f;
     dCent.z += std::cos(schoolTime * 0.07f) * 3.0f;
     dCent.y += std::sin(schoolTime * 0.1f) * 0.5f;
 
+    float escapeSpeed = 15.0f;
+    float returnSpeed = 5.0f;
+    float maxEscapeDist = 30.0f;
+
     for (auto& f : fishList) {
-        f.orbitAngle += f.orbitSpeed * dt;
+       
+        f.orbitAngle += f.baseOrbitSpeed * speedMul * dt;
+        if (f.orbitAngle > glm::two_pi<float>())
+            f.orbitAngle -= glm::two_pi<float>();
+        else if (f.orbitAngle < -glm::two_pi<float>())
+            f.orbitAngle += glm::two_pi<float>();
 
-        float cRad = f.orbitRadius + std::sin(schoolTime * 0.3f + f.phaseOffset) * 1.5f;
+        
+        float cRad = f.baseOrbitRadius + std::sin(schoolTime * 0.3f + f.phaseOffset) * 1.5f;
 
-        glm::vec3 nPos;
-        nPos.x = dCent.x + cRad * std::cos(f.orbitAngle);
-        nPos.z = dCent.z + cRad * std::sin(f.orbitAngle);
-        nPos.y = dCent.y + f.heightOffset + std::sin(schoolTime * 0.5f + f.phaseOffset) * 0.5f;
+        glm::vec3 orbitPos;
+        orbitPos.x = dCent.x + cRad * std::cos(f.orbitAngle);
+        orbitPos.z = dCent.z + cRad * std::sin(f.orbitAngle);
+        orbitPos.y = dCent.y + f.heightOffset + std::sin(schoolTime * 0.5f + f.phaseOffset) * 0.5f;
+
+        // Ucieczka: uzywamy bezposrednio panicMode zeby ryby nie wracaly z opoznieniem
+        if (panicMode) {
+            float currentDist = glm::length(f.escapeOffset);
+            if (currentDist < maxEscapeDist) {
+                f.escapeOffset += f.escapeDir * escapeSpeed * dt;
+            }
+        } else {
+            // Wracanie
+            float dist = glm::length(f.escapeOffset);
+            if (dist > 0.5f) {
+                float speed = returnSpeed * (dist / 4.0f);
+                speed = std::max(speed, 2.0f); 
+                f.escapeOffset -= glm::normalize(f.escapeOffset) * speed * dt;
+            } else {
+                f.escapeOffset *= (1.0f - dt * 5.0f);
+                if (glm::length(f.escapeOffset) < 0.05f)
+                    f.escapeOffset = glm::vec3(0.0f);
+            }
+        }
+
+        glm::vec3 nPos = orbitPos + f.escapeOffset;
 
         glm::vec3 mDir = nPos - f.position;
-        if (glm::length(mDir) > 0.001f) {
-            f.heading = std::atan2(mDir.x, mDir.z) + glm::pi<float>();
+        if (glm::length(mDir) > 0.01f) {
+            float targetHeading = std::atan2(mDir.x, mDir.z) + glm::pi<float>();
+            float angleDiff = targetHeading - f.heading;
+            while (angleDiff > glm::pi<float>()) angleDiff -= glm::two_pi<float>();
+            while (angleDiff < -glm::pi<float>()) angleDiff += glm::two_pi<float>();
+            
+            // Szybszy obrot (6.0), zeby ryba nadazala za zmiana kierunku i nie plywala tylem
+            f.heading += angleDiff * std::min(dt * 6.0f, 1.0f);
         }
 
         f.position = nPos;
     }
+}
+
+void FishSchool::togglePanicMode() {
+    panicMode = !panicMode;
 }
 
 void FishSchool::render(

@@ -112,6 +112,7 @@ Scene::Scene()
     waterNormalMapId = 0;
     showSkybox = false;
     showShadows = true;
+    fKeyPrevious = false;
 }
 
 float getSeabedHeight(float x, float z)
@@ -684,6 +685,14 @@ void Scene::update(float deltaTime, const Input& input)
     glm::vec3 camForward = camera.getForwardDirection();
     fish.update(deltaTime, input, camForward);
     fishSchool.update(deltaTime);
+
+    // Klawisz F - przelaczanie trybu paniki lawicy ryb
+    bool fKeyNow = input.isKeyPressed(GLFW_KEY_F);
+    if (fKeyNow && !fKeyPrevious) {
+        fishSchool.togglePanicMode();
+    }
+    fKeyPrevious = fKeyNow;
+
     verrucosa.update(deltaTime, input);
     for (auto& stray : strayFish)
         stray.update(deltaTime);
