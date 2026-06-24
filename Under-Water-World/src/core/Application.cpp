@@ -147,6 +147,10 @@ void Application::renderUi()
     ImGui::Text("Strzalki gora/dol - kamera gora/dol");
     ImGui::Text("Q - widok do przodu (reset kamery)");
     ImGui::Text("ESC - zamknij");
+    
+    ImGui::Separator();
+    bool isPanic = scene.getFishSchool().isPanicking();
+    ImGui::Text("F - tryb paniki lawicy: %s", isPanic ? "WLACZONY" : "Wylaczony");
 
     ImGui::Separator();
     ImGui::Text("Pearl A13 Controls");
