@@ -28,7 +28,12 @@ bool Model::loadFromFile(const char* path)
         aiMaterial* material = scene->mMaterials[scene->mMeshes[i]->mMaterialIndex];
         aiString texturePath;
 
-        if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
+        if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) != AI_SUCCESS)
+        {
+            material->GetTexture(aiTextureType_BASE_COLOR, 0, &texturePath);
+        }
+
+        if (texturePath.length > 0)
         {
             std::string pathStr = texturePath.C_Str();
 

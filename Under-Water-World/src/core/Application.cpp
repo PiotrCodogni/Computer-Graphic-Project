@@ -153,6 +153,18 @@ void Application::renderUi()
     ImGui::Text("F - tryb paniki lawicy: %s", isPanic ? "WLACZONY" : "Wylaczony");
 
     ImGui::Separator();
+    ImGui::Text("Crystal interaction");
+    ImGui::Text("Status: %s", scene.isCrystalActivated() ? "aktywny" : "nieaktywny");
+    if (scene.canInteractWithCrystal())
+    {
+        ImGui::Text("E - aktywuj / zatrzymaj obrot krysztalu");
+    }
+    else
+    {
+        ImGui::Text("Podplyn blizej krysztalu, zeby uzyc E");
+    }
+
+    ImGui::Separator();
     ImGui::Text("Pearl A13 Controls");
 
     Pearl& pearl = scene.getPearl();

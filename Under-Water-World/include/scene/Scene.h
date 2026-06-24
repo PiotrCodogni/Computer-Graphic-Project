@@ -45,6 +45,7 @@ public:
     Camera& getCamera();
     Stonehenge& getStonehenge();
     Coral& getVerrucosa() { return verrucosa; }
+    Coral& getCrystal() { return crystal; }
     std::vector<Coral>& getCorals() { return corals; }
 
     Pearl& getPearl();
@@ -53,6 +54,8 @@ public:
     bool& getShowSkyboxRef() { return showSkybox; }
     bool areShadowsEnabled() const { return showShadows; }
     bool& getShowShadowsRef() { return showShadows; }
+    bool isCrystalActivated() const { return crystalActivated; }
+    bool canInteractWithCrystal() const { return crystalInInteractionRange; }
 
     const Core::RenderContext& getSeabedContext() const { return seabedContext; }
     const Core::RenderContext& getRockContext() const { return rockContext; }
@@ -90,7 +93,8 @@ private:
 
     Skybox skybox;
     std::vector<Coral> corals;
-    Coral verrucosa;\
+    Coral verrucosa;
+    Coral crystal;
 
     Core::RenderContext seabedContext;
     Core::RenderContext rockContext;
@@ -117,4 +121,8 @@ private:
     bool showSkybox;
     bool showShadows;
     bool fKeyPrevious;  // do wykrywania wcisniecia klawisza F (toggle tryb plywania rybek)
+    bool eKeyPrevious;
+    bool crystalActivated;
+    bool crystalInInteractionRange;
+    float crystalRotation;
 };

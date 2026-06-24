@@ -120,6 +120,7 @@ void Renderer::render(Scene& scene)
 
         scene.getStonehenge().renderDepth(shadowDepthShader, lightSpaceMatrix);
         scene.getPearl().renderDepth(shadowDepthShader, lightSpaceMatrix);
+        scene.getCrystal().renderDepth(shadowDepthShader, lightSpaceMatrix);
         scene.getFish().renderDepth(shadowDepthFishShader, lightSpaceMatrix);
         scene.getSchoolOfFish().renderDepth(shadowDepthFishShader, lightSpaceMatrix);
         scene.getVerrucosa().renderDepth(shadowDepthShader, lightSpaceMatrix);
@@ -268,6 +269,8 @@ void Renderer::render(Scene& scene)
         depthMap,
         scene.areShadowsEnabled()
     );
+
+    scene.getCrystal().render(view, projection, sceneTime, cameraPos, fogColor, fogDensity, lightPos);
 
     // ------------------------------------------------------------------
     //  RYSOWANIE RYBKI GRACZA

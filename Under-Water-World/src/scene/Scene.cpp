@@ -113,6 +113,10 @@ Scene::Scene()
     showSkybox = false;
     showShadows = true;
     fKeyPrevious = false;
+    eKeyPrevious = false;
+    crystalActivated = false;
+    crystalInInteractionRange = false;
+    crystalRotation = 0.0f;
 }
 
 float getSeabedHeight(float x, float z)
@@ -254,6 +258,20 @@ bool Scene::init()
 
     pearl.setPosition(pearlCenter);
     pearl.setScale(pearlRadius);
+
+    if (!crystal.init(
+        "assets/models/crystal/scene.gltf",
+        "shaders/coral.vert",
+        "shaders/coral.frag"
+    ))
+    {
+        std::cout << "Failed to load crystal" << std::endl;
+        return false;
+    }
+
+    crystal.setPosition(glm::vec3(-17.0f, -1.5f, -5.0f));
+    crystal.setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+    crystal.setScale(0.45f);
 
     stonehenge.setPosition(glm::vec3(0.0f, -6.5f, -45.0f));
     stonehenge.setRotation(glm::vec3(-90.0f, 2.5f, 0.0f));
@@ -686,6 +704,26 @@ void Scene::update(float deltaTime, const Input& input)
     fish.update(deltaTime, input, camForward);
     fishSchool.update(deltaTime);
 
+    crystalInInteractionRange = glm::distance(fish.getPosition(), crystal.getPosition()) < 8.0f;
+
+    bool eKeyNow = input.isKeyPressed(GLFW_KEY_E);
+    if (crystalInInteractionRange && eKeyNow && !eKeyPrevious)
+    {
+        crystalActivated = !crystalActivated;
+    }
+    eKeyPrevious = eKeyNow;
+
+    if (crystalActivated)
+    {
+        crystalRotation += deltaTime * 90.0f;
+        if (crystalRotation > 360.0f)
+        {
+            crystalRotation -= 360.0f;
+        }
+
+        crystal.setRotation(glm::vec3(0.0f, crystalRotation, 0.0f));
+    }
+
     // Klawisz F - przelaczanie trybu paniki lawicy ryb
     bool fKeyNow = input.isKeyPressed(GLFW_KEY_F);
     if (fKeyNow && !fKeyPrevious) {
@@ -723,6 +761,7 @@ void Scene::shutdown()
     seabedTexture.shutdown();
     algaeTexture.shutdown();
     pearl.shutdown();
+    crystal.shutdown();
     pearlEnvironmentMap.shutdown();
     skybox.shutdown();
     verrucosa.shutdown();
