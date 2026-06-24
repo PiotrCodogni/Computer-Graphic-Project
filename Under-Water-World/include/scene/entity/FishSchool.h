@@ -19,6 +19,14 @@ struct SchoolFishInstance
     float     orbitSpeed;    // predkosc poruszania sie po orbicie
     float     heightOffset;  // przesuniecie wysokosci wzgledem centrum
     float     scale;         // skala rybki (lekka roznorodnosc)
+
+    // Bazowe wartosci do interpolacji miedzy trybami
+    float     baseOrbitSpeed;
+    float     baseOrbitRadius;
+
+    // Ucieczka - kazda ryba ucieka w swoim losowym kierunku
+    glm::vec3 escapeDir;     // znormalizowany kierunek ucieczki
+    glm::vec3 escapeOffset;  // aktualne przesuniecie od pozycji orbitowej
 };
 
 class FishSchool
@@ -52,6 +60,9 @@ public:
 
     void shutdown();
 
+    void togglePanicMode();
+    bool isPanicking() const { return panicMode; }
+
 private:
     glm::mat4 getFishModelMatrix(const SchoolFishInstance& fish) const;
 
@@ -59,6 +70,9 @@ private:
 
     glm::vec3 schoolCenter;  // punkt centralny lawicy
     float     schoolTime;    // czas animacji
+
+    bool      panicMode;     // tryb paniki (F)
+    float     panicBlend;    // plynne przejscie 0.0 (spokojnie) -> 1.0 (panika)
 
     GLuint shaderProgram;
 
