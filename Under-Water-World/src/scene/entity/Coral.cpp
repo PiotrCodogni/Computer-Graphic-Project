@@ -68,6 +68,9 @@ void Coral::render(
 
     glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
 
+    glUniform1f(glGetUniformLocation(shaderProgram, "metallic"), 0.0f);
+    glUniform1f(glGetUniformLocation(shaderProgram, "roughness"), 0.5f);
+
     model.draw();
 }
 

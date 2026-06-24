@@ -133,7 +133,14 @@ void Renderer::render(Scene& scene)
         {
             stray.renderDepth(shadowDepthFishShader, lightSpaceMatrix);
         }
-        
+        for (auto& skel : scene.getSkeletons())
+        {
+            skel.renderDepth(shadowDepthShader, lightSpaceMatrix);
+        }
+        for (auto& tree : scene.getTrees())
+        {
+            tree.renderDepth(shadowDepthShader, lightSpaceMatrix);
+        }
         glUseProgram(shadowDepthAlgaeShader);
         glUniformMatrix4fv(glGetUniformLocation(shadowDepthAlgaeShader, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
         glUniform1f(glGetUniformLocation(shadowDepthAlgaeShader, "time"), scene.getSceneTime());
@@ -296,6 +303,19 @@ void Renderer::render(Scene& scene)
 
 
     scene.getVerrucosa().render(view, projection, sceneTime, cameraPos, fogColor, fogDensity, lightPos);
+
+
+    for (auto& skel : scene.getSkeletons())
+    {
+        skel.render(view, projection, sceneTime, cameraPos, fogColor, fogDensity, lightPos);
+    }
+
+
+    for (auto& tree : scene.getTrees())
+    {
+        tree.render(view, projection, sceneTime, cameraPos, fogColor, fogDensity, lightPos);
+    }
+    
 
     
     // ------------------------------------------------------------------

@@ -46,6 +46,12 @@
     <ClInclude Include="include\graphics\Skybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\scene\entity\Coral.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scene\entity\SchoolOfFish.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -106,6 +112,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\Skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\entity\Coral.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\entity\SchoolOfFish.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -175,6 +187,12 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shaders\skybox.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\coral.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\coral.frag">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

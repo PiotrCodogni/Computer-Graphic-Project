@@ -47,6 +47,11 @@ public:
     Coral& getVerrucosa() { return verrucosa; }
     Coral& getCrystal() { return crystal; }
     std::vector<Coral>& getCorals() { return corals; }
+    std::vector<Coral>& getSkeletons() { return skeletons; }
+    std::vector<Coral>& getTrees() { return trees; }
+
+
+
 
     Pearl& getPearl();
     Skybox& getSkybox() { return skybox; }
@@ -90,10 +95,13 @@ private:
     Stonehenge stonehenge;
     Cubemap pearlEnvironmentMap;
     Pearl pearl;
+    
 
     Skybox skybox;
     std::vector<Coral> corals;
     Coral verrucosa;
+    std::vector<Coral> skeletons;
+    std::vector<Coral> trees;
     Coral crystal;
 
     Core::RenderContext seabedContext;

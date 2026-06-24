@@ -215,6 +215,76 @@ bool Scene::init()
     verrucosa.setRotation(glm::vec3(-189.0f, 0.0f, 0.0f));
     verrucosa.setScale(0.5f);
 
+
+    CoralSpawn skeletonSpawns[] = {
+        { 8.29f, -36.27f, 0.0f },
+        { -25.0f, 18.0f, 0.0f },
+        { 45.0f, -30.0f, 0.0f },
+        {-38.07f, -53.24f, 0.0f },
+        {-55.47f, -29.63f, 3.0f },
+        {-41.65f, -76.99f, 3.0f },
+        {4.10f, -80.63f, 0.0f },
+        {-82.85, -64.85, 4.0f }
+        // wpisz tutaj docelowe współrzędne dla modeli skeleton
+    };
+
+    for (const auto& spawn : skeletonSpawns)
+    {
+        Coral skel;
+        if (!skel.init(
+            "assets/models/skeleton/scene.gltf",
+            "shaders/coral.vert",
+            "shaders/coral.frag"
+        ))
+        {
+            std::cout << "Failed to init skeleton" << std::endl;
+            continue;
+        }
+
+        float y = getSeabedHeight(spawn.x, spawn.z);
+        skel.setPosition(glm::vec3(spawn.x, y + spawn.yOffset, spawn.z));
+        skel.setRotation(glm::vec3(0.0f, 5.0f, 5.0f));
+
+        // Opcjonalna losowa skala, żeby szkielety trochę się różniły
+        
+        skel.setScale(150.0f);
+
+        skel.setPivotOffset(glm::vec3(0.0f, 0.0f, 0.0f));
+
+        skeletons.push_back(std::move(skel));
+    }
+
+    CoralSpawn treeSpawns[] = {
+        { 32.37f, 3.89f, 7.0f },
+        {34.34f, -45.25f, 7.0f},
+        {-3.07f, -104.26, 7.0f},
+        {-47.16f, -108.71f, 7.0f},
+        {-87.53f, -43.05f, 7.0f},
+        {-51.90f, -13.55f, 7.0f}
+    };
+
+    for (const auto& spawn : treeSpawns)
+    {
+        Coral tree;
+        if (!tree.init(
+            "assets/models/tree/scene.gltf",
+            "shaders/coral.vert",
+            "shaders/coral.frag"
+        ))
+        {
+            std::cout << "Failed to init tree" << std::endl;
+            continue;
+        }
+
+        float y = getSeabedHeight(spawn.x, spawn.z);
+        tree.setPosition(glm::vec3(spawn.x, y + spawn.yOffset, spawn.z));
+        tree.setRotation(glm::vec3(22.5f, 0.0f, 20.6f));
+        tree.setScale(150.0f);
+        tree.setPivotOffset(glm::vec3(0.0f, 0.0f, 0.0f));
+
+        trees.push_back(std::move(tree));
+    }
+
     
     if (!pearlEnvironmentMap.loadFromFiles({
     "assets/environment/pearl/right.png",
@@ -742,6 +812,10 @@ void Scene::update(float deltaTime, const Input& input)
     for (auto& c : corals)
         c.update(deltaTime, input);
 
+
+    for (auto& tree : trees)
+        tree.update(deltaTime, input);
+
 }
 
 void Scene::shutdown()
@@ -755,7 +829,8 @@ void Scene::shutdown()
 
     for (auto& c : corals)
         c.shutdown();
-
+    for (auto& tree : trees)
+        tree.shutdown();
 
 
     seabedTexture.shutdown();
