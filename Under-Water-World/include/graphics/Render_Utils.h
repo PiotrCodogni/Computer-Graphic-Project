@@ -26,6 +26,14 @@ namespace Core
 			const std::vector<glm::vec2>& texCoords,
 			const std::vector<unsigned int>& indices
 		);
+		void initFromVectors(
+			const std::vector<glm::vec3>& positions,
+			const std::vector<glm::vec3>& normals,
+			const std::vector<glm::vec2>& texCoords,
+			const std::vector<unsigned int>& indices,
+			const std::vector<glm::vec3>& tangents,
+			const std::vector<glm::vec3>& bitangents
+		);
 	};
 
 	// vertexArray - jednowymiarowa tablica zawierajaca wartosci opisujace pozycje kolejnych wierzcholkow w jednym ciagu (x1, y1, z1, w1, x2, y2, z2, w2, ...)
