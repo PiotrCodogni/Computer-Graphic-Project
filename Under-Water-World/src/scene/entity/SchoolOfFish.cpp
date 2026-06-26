@@ -12,9 +12,6 @@ bool SchoolOfFish::init(const char* mPath, const char* tPath, const char* vShade
     if (!texture.loadFromFile(tPath, true)) return false;
     if (!model.loadFromFile(mPath)) return false;
 
-    // ------------------------------------------------------------------
-    // GENEROWANIE ZAMKNI�TEJ P�TLI SPLAJNU
-    // ------------------------------------------------------------------
     std::vector<glm::vec3> controlPoints = {
         glm::vec3(-36.33f, -0.36f, -55.9f),
         glm::vec3(-24.12f, 5.66f, -56.76f),
@@ -40,7 +37,6 @@ bool SchoolOfFish::init(const char* mPath, const char* tPath, const char* vShade
         for (int step = 0; step < pointsPerSegment; ++step) {
             float t = (float)step / (float)pointsPerSegment;
 
-            // Interpolacja Catmull-Rom
             glm::vec3 pos = 0.5f * ((2.0f * p1) +
                 (-p0 + p2) * t +
                 (2.0f * p0 - 5.0f * p1 + 4.0f * p2 - p3) * t * t +
@@ -49,9 +45,6 @@ bool SchoolOfFish::init(const char* mPath, const char* tPath, const char* vShade
         }
     }
 
-    // ------------------------------------------------------------------
-    // PARALLEL TRANSPORT FRAMES PRECOMPUTATION
-    // ------------------------------------------------------------------
     size_t M = loopPositions.size();
     frames.resize(M);
 
@@ -68,9 +61,9 @@ bool SchoolOfFish::init(const char* mPath, const char* tPath, const char* vShade
     frames[0].B = glm::normalize(glm::cross(frames[0].T, up));
     frames[0].N = glm::cross(frames[0].B, frames[0].T);
 
-    fishProgress.resize(5, 0.0f); // 5 rybek
+    fishProgress.resize(5, 0.0f);
     for (int i = 0; i < 5; ++i) {
-        fishProgress[i] = (float)frames.size() - (i * 60.0f); // Pocz�tkowy odst�p
+        fishProgress[i] = (float)frames.size() - (i * 60.0f);
     }
 
     for (size_t i = 1; i < M; ++i) {
@@ -162,19 +155,12 @@ void SchoolOfFish::renderDepth(GLuint depthShader, const glm::mat4& lightSpaceMa
 
 glm::mat4 SchoolOfFish::getFishModelMatrix(const PTFrame& frame) const
 {
-    glm::vec3 T = frame.T;
-    glm::vec3 w_up = glm::vec3(0.0f, 1.0f, 0.0f);
-    if (std::abs(glm::dot(T, w_up)) > 0.99f) w_up = glm::vec3(0.0f, 0.0f, 1.0f);
-
-    glm::vec3 B = glm::normalize(glm::cross(w_up, T));
-    glm::vec3 N = glm::normalize(glm::cross(T, B));
-
     glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), frame.P);
 
     glm::mat4 rotMat(1.0f);
-    rotMat[0] = glm::vec4(B, 0.0f);
-    rotMat[1] = glm::vec4(N, 0.0f);
-    rotMat[2] = glm::vec4(T, 0.0f);
+    rotMat[0] = glm::vec4(frame.B, 0.0f);
+    rotMat[1] = glm::vec4(frame.N, 0.0f);
+    rotMat[2] = glm::vec4(frame.T, 0.0f);
 
     modelMatrix = modelMatrix * rotMat;
     modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
